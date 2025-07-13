@@ -1,684 +1,194 @@
-local LunarUI = {
-    Themes = {
-        Midnight = {
-            Primary = Color3.fromRGB(30, 30, 45),
-            Secondary = Color3.fromRGB(45, 45, 60),
-            Accent = Color3.fromRGB(100, 150, 255),
-            Text = Color3.fromRGB(240, 240, 240),
-            SubText = Color3.fromRGB(180, 180, 200)
-        },
-        Solar = {
-            Primary = Color3.fromRGB(50, 50, 60),
-            Secondary = Color3.fromRGB(70, 70, 80),
-            Accent = Color3.fromRGB(255, 150, 50),
-            Text = Color3.fromRGB(250, 250, 250),
-            SubText = Color3.fromRGB(200, 200, 210)
-        },
-        Ocean = {
-            Primary = Color3.fromRGB(25, 35, 45),
-            Secondary = Color3.fromRGB(35, 45, 55),
-            Accent = Color3.fromRGB(50, 200, 220),
-            Text = Color3.fromRGB(230, 240, 250),
-            SubText = Color3.fromRGB(170, 180, 190)
-        }
-    },
-    CurrentTheme = "Midnight",
-    Elements = {},
-    Options = {},
+-- BetterRedz_UI: Full Feature Custom UI Library (Night Mode, Large Scale)
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
+local Player = Players.LocalPlayer
+
+local BetterRedz = {
     Tabs = {},
     Flags = {},
-    Connections = {}
+    Connections = {},
+    Theme = {
+        Background = Color3.fromRGB(20, 20, 20),
+        Accent = Color3.fromRGB(85, 170, 255),
+        Text = Color3.fromRGB(240, 240, 240),
+        Section = Color3.fromRGB(30, 30, 30),
+        Input = Color3.fromRGB(40, 40, 40)
+    },
+    UISize = UDim2.new(0, 700, 0, 480)
 }
 
--- خدمات الروبلوكس الأساسية
-local Services = {
-    RunService = game:GetService("RunService"),
-    UserInputService = game:GetService("UserInputService"),
-    TweenService = game:GetService("TweenService"),
-    HttpService = game:GetService("HttpService"),
-    Players = game:GetService("Players")
-}
-
-local Player = Services.Players.LocalPlayer
-local Mouse = Player:GetMouse()
-
--- إنشاء الواجهة الرئيسية
-local MainUI = Instance.new("ScreenGui")
-MainUI.Name = "LunarUI"
-MainUI.Parent = game:GetService("CoreGui")
-MainUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-local UIScale = Instance.new("UIScale")
-UIScale.Parent = MainUI
-
--- وظائف مساعدة
-local function CreateElement(type, props, children)
-    local element = Instance.new(type)
-    
-    if props then
-        for prop, value in pairs(props) do
-            element[prop] = value
-        end
+local function CreateInstance(class, props)
+    local inst = Instance.new(class)
+    for i, v in pairs(props) do
+        inst[i] = v
     end
-    
-    if children then
-        for _, child in ipairs(children) do
-            child.Parent = element
-        end
-    end
-    
-    return element
+    return inst
 end
 
-local function ApplyTheme(element, elementType)
-    local theme = LunarUI.Themes[LunarUI.CurrentTheme]
-    
-    if elementType == "Frame" then
-        element.BackgroundColor3 = theme.Primary
-    elseif elementType == "SecondaryFrame" then
-        element.BackgroundColor3 = theme.Secondary
-    elseif elementType == "Accent" then
-        element.BackgroundColor3 = theme.Accent
-    elseif elementType == "Text" then
-        element.TextColor3 = theme.Text
-    elseif elementType == "SubText" then
-        element.TextColor3 = theme.SubText
-    end
+local function AddPadding(ui)
+    local padding = Instance.new("UIPadding")
+    padding.PaddingTop = UDim.new(0, 6)
+    padding.PaddingBottom = UDim.new(0, 6)
+    padding.PaddingLeft = UDim.new(0, 10)
+    padding.PaddingRight = UDim.new(0, 10)
+    padding.Parent = ui
 end
 
-local function MakeDraggable(frame, handle)
-    handle = handle or frame
-    local dragStart, startPos
-    
-    handle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragStart = input.Position
-            startPos = frame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragStart = nil
-                end
-            end)
-        end
-    end)
-    
-    handle.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragStart then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(
-                startPos.X.Scale, 
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale, 
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-end
-
--- إنشاء النافذة الرئيسية
-function LunarUI:CreateWindow(config)
-    config = config or {}
-    local title = config.Title or "Lunar UI"
-    local subtitle = config.SubTitle or "Premium UI Library"
-    
-    local MainFrame = CreateElement("Frame", {
-        Name = "MainFrame",
-        Size = UDim2.new(0, 500, 0, 400),
-        Position = UDim2.new(0.5, -250, 0.5, -200),
-        BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Primary,
-        Parent = MainUI
-    }, {
-        CreateElement("UICorner", {CornerRadius = UDim.new(0, 8)}),
-        CreateElement("UIStroke", {
-            Color = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-            Thickness = 1
-        })
+function BetterRedz:Tab(name)
+    local ScreenGui = CreateInstance("ScreenGui", {
+        Name = "BetterRedzUI_" .. name,
+        ResetOnSpawn = false,
+        Parent = CoreGui
     })
-    
-    ApplyTheme(MainFrame, "Frame")
-    MakeDraggable(MainFrame)
-    
-    -- شريط العنوان
-    local TitleBar = CreateElement("Frame", {
-        Name = "TitleBar",
-        Size = UDim2.new(1, 0, 0, 30),
-        BackgroundTransparency = 1,
-        Parent = MainFrame
-    }, {
-        CreateElement("TextLabel", {
-            Name = "Title",
+
+    local MainFrame = CreateInstance("Frame", {
+        Name = "Main",
+        Size = self.UISize,
+        BackgroundColor3 = self.Theme.Background,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, -self.UISize.X.Offset/2, 0.5, -self.UISize.Y.Offset/2),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Parent = ScreenGui
+    })
+
+    local UIListLayout = Instance.new("UIListLayout", MainFrame)
+    UIListLayout.Padding = UDim.new(0, 8)
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    local Tab = {
+        Sections = {},
+        Frame = MainFrame
+    }
+
+    function Tab:Section(title)
+        local section = CreateInstance("Frame", {
+            Size = UDim2.new(1, -20, 0, 60),
+            BackgroundColor3 = BetterRedz.Theme.Section,
+            BorderSizePixel = 0,
+            Parent = MainFrame
+        })
+        AddPadding(section)
+
+        local label = CreateInstance("TextLabel", {
             Text = title,
             Font = Enum.Font.GothamBold,
-            TextSize = 14,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.new(0, 10, 0.5, 0),
-            AnchorPoint = Vector2.new(0, 0.5),
+            TextSize = 16,
+            TextColor3 = BetterRedz.Theme.Text,
             BackgroundTransparency = 1,
-            Size = UDim2.new(0.6, 0, 0, 20)
-        }),
-        CreateElement("TextLabel", {
-            Name = "SubTitle",
-            Text = subtitle,
+            Size = UDim2.new(1, 0, 0, 20),
+            Parent = section
+        })
+
+        return section
+    end
+
+    function Tab:Button(tbl)
+        local btn = CreateInstance("TextButton", {
+            Text = tbl.Text or "Button",
+            Size = UDim2.new(1, -20, 0, 30),
+            BackgroundColor3 = BetterRedz.Theme.Accent,
+            TextColor3 = BetterRedz.Theme.Text,
             Font = Enum.Font.Gotham,
-            TextSize = 11,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Position = UDim2.new(0, 10, 0.5, 0),
-            AnchorPoint = Vector2.new(0, 0.5),
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0.6, 0, 0, 15),
-            TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].SubText
+            TextSize = 14,
+            Parent = MainFrame
         })
-    })
-    
-    ApplyTheme(TitleBar.Title, "Text")
-    ApplyTheme(TitleBar.SubTitle, "SubText")
-    
-    -- أزرار التحكم
-    local ControlButtons = CreateElement("Frame", {
-        Name = "ControlButtons",
-        Size = UDim2.new(0, 60, 0, 20),
-        Position = UDim2.new(1, -70, 0.5, 0),
-        AnchorPoint = Vector2.new(1, 0.5),
-        BackgroundTransparency = 1,
-        Parent = TitleBar
-    }, {
-        CreateElement("UIListLayout", {
-            FillDirection = Enum.FillDirection.Horizontal,
-            Padding = UDim.new(0, 5)
-        }),
-        CreateElement("TextButton", {
-            Name = "Minimize",
-            Text = "_",
-            Size = UDim2.new(0, 20, 0, 20),
-            BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-            TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-            Font = Enum.Font.GothamBold,
-            TextSize = 14
-        }, {
-            CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)})
-        }),
-        CreateElement("TextButton", {
-            Name = "Close",
-            Text = "×",
-            Size = UDim2.new(0, 20, 0, 20),
-            BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-            TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-            Font = Enum.Font.GothamBold,
-            TextSize = 14
-        }, {
-            CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)})
-        })
-    })
-    
-    -- تبويبات الواجهة
-    local TabContainer = CreateElement("Frame", {
-        Name = "TabContainer",
-        Size = UDim2.new(0, 120, 1, -40),
-        Position = UDim2.new(0, 10, 0, 40),
-        BackgroundTransparency = 1,
-        Parent = MainFrame
-    }, {
-        CreateElement("UIListLayout", {
-            Padding = UDim.new(0, 5)
-        })
-    })
-    
-    -- منطقة المحتوى
-    local ContentArea = CreateElement("Frame", {
-        Name = "ContentArea",
-        Size = UDim2.new(1, -140, 1, -50),
-        Position = UDim2.new(0, 130, 0, 40),
-        BackgroundTransparency = 1,
-        ClipsDescendants = true,
-        Parent = MainFrame
-    })
-    
-    -- وظائف النافذة
-    local Window = {}
-    
-    function Window:Minimize()
-        MainFrame.Size = UDim2.new(MainFrame.Size.X.Scale, MainFrame.Size.X.Offset, 0, 30)
-    end
-    
-    function Window:Restore()
-        MainFrame.Size = UDim2.new(0, 500, 0, 400)
-    end
-    
-    function Window:Close()
-        MainUI:Destroy()
-    end
-    
-    ControlButtons.Minimize.MouseButton1Click:Connect(function()
-        if MainFrame.Size.Y.Offset == 30 then
-            Window:Restore()
-        else
-            Window:Minimize()
-        end
-    end)
-    
-    ControlButtons.Close.MouseButton1Click:Connect(Window.Close)
-    
-    -- إنشاء تبويب جديد
-    function Window:CreateTab(name, icon)
-        local TabButton = CreateElement("TextButton", {
-            Name = name,
-            Text = name,
-            Size = UDim2.new(1, 0, 0, 30),
-            BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-            TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-            Font = Enum.Font.GothamMedium,
-            TextSize = 12,
-            Parent = TabContainer
-        }, {
-            CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)}),
-            CreateElement("UIStroke", {
-                Color = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-                Thickness = 1
-            })
-        })
-        
-        local TabContent = CreateElement("ScrollingFrame", {
-            Name = name.."Content",
-            Size = UDim2.new(1, 0, 1, 0),
-            BackgroundTransparency = 1,
-            ScrollBarThickness = 3,
-            ScrollBarImageColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-            Visible = false,
-            Parent = ContentArea
-        }, {
-            CreateElement("UIListLayout", {
-                Padding = UDim.new(0, 8)
-            }),
-            CreateElement("UIPadding", {
-                PaddingTop = UDim.new(0, 5),
-                PaddingBottom = UDim.new(0, 5),
-                PaddingLeft = UDim.new(0, 5),
-                PaddingRight = UDim.new(0, 5)
-            })
-        })
-        
-        TabButton.MouseButton1Click:Connect(function()
-            for _, tab in ipairs(ContentArea:GetChildren()) do
-                if tab:IsA("ScrollingFrame") then
-                    tab.Visible = false
-                end
-            end
-            TabContent.Visible = true
+        btn.MouseButton1Click:Connect(function()
+            pcall(tbl.Callback)
         end)
-        
-        -- تفعيل أول تبويب تلقائياً
-        if #TabContainer:GetChildren() == 3 then -- UIListLayout + TabButton
-            TabContent.Visible = true
-        end
-        
-        local Tab = {}
-        
-        function Tab:AddButton(config)
-            config = config or {}
-            local name = config.Name or "Button"
-            local callback = config.Callback or function() end
-            
-            local Button = CreateElement("TextButton", {
-                Name = name,
-                Text = name,
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-                TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                Font = Enum.Font.GothamMedium,
-                TextSize = 12,
-                Parent = TabContent
-            }, {
-                CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)}),
-                CreateElement("UIStroke", {
-                    Color = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-                    Thickness = 1
-                })
-            })
-            
-            Button.MouseButton1Click:Connect(callback)
-            
-            return Button
-        end
-        
-        function Tab:AddToggle(config)
-            config = config or {}
-            local name = config.Name or "Toggle"
-            local default = config.Default or false
-            local callback = config.Callback or function() end
-            
-            local ToggleFrame = CreateElement("Frame", {
-                Name = name,
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundTransparency = 1,
-                Parent = TabContent
-            }, {
-                CreateElement("TextLabel", {
-                    Name = "Label",
-                    Text = name,
-                    Size = UDim2.new(0.7, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 12,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                }),
-                CreateElement("Frame", {
-                    Name = "Toggle",
-                    Size = UDim2.new(0, 50, 0, 25),
-                    Position = UDim2.new(1, -5, 0.5, 0),
-                    AnchorPoint = Vector2.new(1, 0.5),
-                    BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary
-                }, {
-                    CreateElement("UICorner", {CornerRadius = UDim.new(0, 12)}),
-                    CreateElement("Frame", {
-                        Name = "ToggleButton",
-                        Size = UDim2.new(0, 21, 0, 21),
-                        Position = default and UDim2.new(1, -23, 0.5, 0) or UDim2.new(0, 2, 0.5, 0),
-                        AnchorPoint = Vector2.new(0, 0.5),
-                        BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Accent
-                    }, {
-                        CreateElement("UICorner", {CornerRadius = UDim.new(0, 10)})
-                    })
-                })
-            })
-            
-            local ToggleButton = ToggleFrame.Toggle.ToggleButton
-            local isToggled = default
-            
-            local function UpdateToggle()
-                Services.TweenService:Create(ToggleButton, TweenInfo.new(0.2), {
-                    Position = isToggled and UDim2.new(1, -23, 0.5, 0) or UDim2.new(0, 2, 0.5, 0),
-                    BackgroundColor3 = isToggled and LunarUI.Themes[LunarUI.CurrentTheme].Accent or Color3.fromRGB(150, 150, 150)
-                }):Play()
-                
-                callback(isToggled)
-            end
-            
-            ToggleFrame.Toggle.MouseButton1Click:Connect(function()
-                isToggled = not isToggled
-                UpdateToggle()
-            end)
-            
-            UpdateToggle()
-            
-            return {
-                Set = function(value)
-                    isToggled = value
-                    UpdateToggle()
-                end,
-                Get = function()
-                    return isToggled
-                end
-            }
-        end
-        
-        function Tab:AddSlider(config)
-            config = config or {}
-            local name = config.Name or "Slider"
-            local min = config.Min or 0
-            local max = config.Max or 100
-            local default = config.Default or 50
-            local callback = config.Callback or function() end
-            
-            local SliderFrame = CreateElement("Frame", {
-                Name = name,
-                Size = UDim2.new(1, 0, 0, 50),
-                BackgroundTransparency = 1,
-                Parent = TabContent
-            }, {
-                CreateElement("TextLabel", {
-                    Name = "Label",
-                    Text = name,
-                    Size = UDim2.new(1, 0, 0, 20),
-                    BackgroundTransparency = 1,
-                    TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 12,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                }),
-                CreateElement("Frame", {
-                    Name = "Track",
-                    Size = UDim2.new(1, 0, 0, 5),
-                    Position = UDim2.new(0, 0, 1, -15),
-                    AnchorPoint = Vector2.new(0, 1),
-                    BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary
-                }, {
-                    CreateElement("UICorner", {CornerRadius = UDim.new(0, 2)}),
-                    CreateElement("Frame", {
-                        Name = "Fill",
-                        Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
-                        BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Accent
-                    }, {
-                        CreateElement("UICorner", {CornerRadius = UDim.new(0, 2)})
-                    }),
-                    CreateElement("Frame", {
-                        Name = "Thumb",
-                        Size = UDim2.new(0, 15, 0, 15),
-                        Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0),
-                        AnchorPoint = Vector2.new(0.5, 0.5),
-                        BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-                        ZIndex = 2
-                    }, {
-                        CreateElement("UICorner", {CornerRadius = UDim.new(1, 0)}),
-                        CreateElement("UIStroke", {
-                            Color = Color3.fromRGB(255, 255, 255),
-                            Thickness = 2
-                        })
-                    })
-                }),
-                CreateElement("TextLabel", {
-                    Name = "Value",
-                    Text = default,
-                    Size = UDim2.new(0, 40, 0, 20),
-                    Position = UDim2.new(1, 0, 0, 0),
-                    AnchorPoint = Vector2.new(1, 0),
-                    BackgroundTransparency = 1,
-                    TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 12,
-                    TextXAlignment = Enum.TextXAlignment.Right
-                })
-            })
-            
-            local Track = SliderFrame.Track
-            local Fill = Track.Fill
-            local Thumb = Track.Thumb
-            local ValueLabel = SliderFrame.Value
-            
-            local function UpdateSlider(value)
-                local percent = math.clamp((value - min) / (max - min), 0, 1)
-                
-                Services.TweenService:Create(Fill, TweenInfo.new(0.1), {
-                    Size = UDim2.new(percent, 0, 1, 0)
-                }):Play()
-                
-                Services.TweenService:Create(Thumb, TweenInfo.new(0.1), {
-                    Position = UDim2.new(percent, 0, 0.5, 0)
-                }):Play()
-                
-                ValueLabel.Text = math.floor(value)
-                callback(value)
-            end
-            
-            local isDragging = false
-            
-            local function GetValueFromXPosition(x)
-                local relativeX = x - Track.AbsolutePosition.X
-                local percent = math.clamp(relativeX / Track.AbsoluteSize.X, 0, 1)
-                return math.floor(min + (max - min) * percent)
-            end
-            
-            Track.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    isDragging = true
-                    local value = GetValueFromXPosition(Mouse.X)
-                    UpdateSlider(value)
-                end
-            end)
-            
-            Track.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    isDragging = false
-                end
-            end)
-            
-            Services.UserInputService.InputChanged:Connect(function(input)
-                if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local value = GetValueFromXPosition(Mouse.X)
-                    UpdateSlider(value)
-                end
-            end)
-            
-            UpdateSlider(default)
-            
-            return {
-                Set = function(value)
-                    UpdateSlider(math.clamp(value, min, max))
-                end,
-                Get = function()
-                    return tonumber(ValueLabel.Text)
-                end
-            }
-        end
-        
-        function Tab:AddDropdown(config)
-            config = config or {}
-            local name = config.Name or "Dropdown"
-            local options = config.Options or {"Option 1", "Option 2", "Option 3"}
-            local default = config.Default or options[1]
-            local callback = config.Callback or function() end
-            
-            local DropdownFrame = CreateElement("Frame", {
-                Name = name,
-                Size = UDim2.new(1, 0, 0, 30),
-                BackgroundTransparency = 1,
-                Parent = TabContent
-            }, {
-                CreateElement("TextLabel", {
-                    Name = "Label",
-                    Text = name,
-                    Size = UDim2.new(0.5, 0, 1, 0),
-                    BackgroundTransparency = 1,
-                    TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 12,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                }),
-                CreateElement("TextButton", {
-                    Name = "DropdownButton",
-                    Text = default,
-                    Size = UDim2.new(0.5, 0, 1, 0),
-                    Position = UDim2.new(1, 0, 0, 0),
-                    AnchorPoint = Vector2.new(1, 0),
-                    BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-                    TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                    Font = Enum.Font.GothamMedium,
-                    TextSize = 12
-                }, {
-                    CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)}),
-                    CreateElement("UIStroke", {
-                        Color = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-                        Thickness = 1
-                    }),
-                    CreateElement("ImageLabel", {
-                        Name = "Arrow",
-                        Image = "rbxassetid://6031090990",
-                        Size = UDim2.new(0, 15, 0, 15),
-                        Position = UDim2.new(1, -5, 0.5, 0),
-                        AnchorPoint = Vector2.new(1, 0.5),
-                        BackgroundTransparency = 1,
-                        Rotation = 180
-                    })
-                })
-            })
-            
-            local DropdownButton = DropdownFrame.DropdownButton
-            local Arrow = DropdownButton.Arrow
-            local OptionsFrame = nil
-            local isOpen = false
-            
-            local function ToggleDropdown()
-                isOpen = not isOpen
-                
-                if isOpen then
-                    Services.TweenService:Create(Arrow, TweenInfo.new(0.2), {
-                        Rotation = 0
-                    }):Play()
-                    
-                    OptionsFrame = CreateElement("Frame", {
-                        Name = "Options",
-                        Size = UDim2.new(0.5, 0, 0, #options * 30 + 10),
-                        Position = UDim2.new(1, 0, 1, 5),
-                        AnchorPoint = Vector2.new(1, 0),
-                        BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Primary,
-                        Parent = DropdownFrame
-                    }, {
-                        CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)}),
-                        CreateElement("UIStroke", {
-                            Color = LunarUI.Themes[LunarUI.CurrentTheme].Accent,
-                            Thickness = 1
-                        }),
-                        CreateElement("UIListLayout", {
-                            Padding = UDim.new(0, 5)
-                        }),
-                        CreateElement("UIPadding", {
-                            PaddingTop = UDim.new(0, 5),
-                            PaddingBottom = UDim.new(0, 5),
-                            PaddingLeft = UDim.new(0, 5),
-                            PaddingRight = UDim.new(0, 5)
-                        })
-                    })
-                    
-                    for i, option in ipairs(options) do
-                        local OptionButton = CreateElement("TextButton", {
-                            Name = option,
-                            Text = option,
-                            Size = UDim2.new(1, -10, 0, 25),
-                            BackgroundColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Secondary,
-                            TextColor3 = LunarUI.Themes[LunarUI.CurrentTheme].Text,
-                            Font = Enum.Font.GothamMedium,
-                            TextSize = 12,
-                            Parent = OptionsFrame
-                        }, {
-                            CreateElement("UICorner", {CornerRadius = UDim.new(0, 4)})
-                        })
-                        
-                        OptionButton.MouseButton1Click:Connect(function()
-                            DropdownButton.Text = option
-                            callback(option)
-                            ToggleDropdown()
-                        end)
-                    end
-                else
-                    Services.TweenService:Create(Arrow, TweenInfo.new(0.2), {
-                        Rotation = 180
-                    }):Play()
-                    
-                    if OptionsFrame then
-                        OptionsFrame:Destroy()
-                        OptionsFrame = nil
-                    end
-                end
-            end
-            
-            DropdownButton.MouseButton1Click:Connect(ToggleDropdown)
-            
-            return {
-                SetOptions = function(newOptions)
-                    options = newOptions
-                end,
-                SetSelected = function(option)
-                    if table.find(options, option) then
-                        DropdownButton.Text = option
-                    end
-                end
-            }
-        end
-        
-        return Tab
     end
-    
-    return Window
+
+    function Tab:Toggle(tbl)
+        local flag = tbl.Flag
+        BetterRedz.Flags[flag] = tbl.Default or false
+
+        local toggle = CreateInstance("TextButton", {
+            Text = tbl.Text .. ": " .. (BetterRedz.Flags[flag] and "ON" or "OFF"),
+            Size = UDim2.new(1, -20, 0, 30),
+            BackgroundColor3 = BetterRedz.Theme.Input,
+            TextColor3 = BetterRedz.Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = MainFrame
+        })
+
+        toggle.MouseButton1Click:Connect(function()
+            BetterRedz.Flags[flag] = not BetterRedz.Flags[flag]
+            toggle.Text = tbl.Text .. ": " .. (BetterRedz.Flags[flag] and "ON" or "OFF")
+            pcall(tbl.Callback, BetterRedz.Flags[flag])
+        end)
+    end
+
+    function Tab:Slider(tbl)
+        local value = tbl.Default or tbl.Min
+        local slider = CreateInstance("TextButton", {
+            Text = tbl.Text .. ": " .. value,
+            Size = UDim2.new(1, -20, 0, 30),
+            BackgroundColor3 = BetterRedz.Theme.Input,
+            TextColor3 = BetterRedz.Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = MainFrame
+        })
+        slider.MouseButton1Click:Connect(function()
+            value = value + 1
+            if value > tbl.Max then value = tbl.Min end
+            slider.Text = tbl.Text .. ": " .. value
+            pcall(tbl.Callback, value)
+        end)
+    end
+
+    function Tab:Label(tbl)
+        CreateInstance("TextLabel", {
+            Text = tbl.Text,
+            Size = UDim2.new(1, -20, 0, 24),
+            BackgroundTransparency = 1,
+            TextColor3 = BetterRedz.Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = MainFrame
+        })
+    end
+
+    function Tab:Textbox(tbl)
+        local box = CreateInstance("TextBox", {
+            PlaceholderText = tbl.Text or "Type...",
+            Size = UDim2.new(1, -20, 0, 30),
+            BackgroundColor3 = BetterRedz.Theme.Input,
+            TextColor3 = BetterRedz.Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = MainFrame
+        })
+        box.FocusLost:Connect(function()
+            pcall(tbl.Callback, box.Text)
+        end)
+    end
+
+    function Tab:Dropdown(tbl)
+        local selected = tbl.Default or tbl.List[1]
+        local dropdown = CreateInstance("TextButton", {
+            Text = tbl.Text .. ": " .. selected,
+            Size = UDim2.new(1, -20, 0, 30),
+            BackgroundColor3 = BetterRedz.Theme.Input,
+            TextColor3 = BetterRedz.Theme.Text,
+            Font = Enum.Font.Gotham,
+            TextSize = 14,
+            Parent = MainFrame
+        })
+        dropdown.MouseButton1Click:Connect(function()
+            local idx = table.find(tbl.List, selected) or 0
+            idx = idx + 1
+            if idx > #tbl.List then idx = 1 end
+            selected = tbl.List[idx]
+            dropdown.Text = tbl.Text .. ": " .. selected
+            pcall(tbl.Callback, selected)
+        end)
+    end
+
+    return Tab
 end
 
-return LunarUI
+return BetterRedz

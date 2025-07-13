@@ -1,0 +1,96 @@
+local redzlib = loadstring(game:HttpGet("رابط_redzlib"))()
+
+-- إعدادات الواجهة
+local Configs_HUB = {
+    Cor_Hub = Color3.fromRGB(15, 15, 15),
+    Cor_Options = Color3.fromRGB(15, 15, 15),
+    Cor_Stroke = Color3.fromRGB(196, 164, 132),
+    Cor_Text = Color3.fromRGB(169, 169, 169),
+    Cor_DarkText = Color3.fromRGB(240, 240, 240),
+    Corner_Radius = 4,
+    Text_Font = Enum.Font.FredokaOne
+}
+
+-- إنشاء النافذة الرئيسية
+local Window = redzlib:MakeWindow({
+    Name = "YHUB library",
+    SubTitle = "by : redz9999"
+})
+
+-- تغيير سمة الواجهة لتناسب الألوان المطلوبة
+redzlib:SetTheme("Darker") -- يمكن تعديلها حسب الحاجة
+
+-- إعداد الإشعارات
+function MakeNotifi(Configs)
+    local Title = Configs.Title or "REDz HUB"
+    local text = Configs.Text or "Notification"
+    local timewait = Configs.Time or 5
+    
+    -- سيتم تنفيذ الإشعارات بنفس الطريقة ولكن مع تعديلات طفيفة
+    -- (تفاصيل التنفيذ تعتمد على كيفية دعم redzlib للإشعارات)
+end
+
+-- نظام المفتاح (إن وجد)
+if Configs.Key.KeySystem then
+    local KeyDialog = Window:Dialog({
+        Title = Configs.Key.Title or "Key System",
+        Text = Configs.Key.Description or ".-.",
+        Options = {
+            {"Confirm", function()
+                -- التحقق من المفتاح هنا
+            end},
+            {"Get Key", function()
+                setclipboard(Configs.Key.KeyLink or "")
+            end}
+        }
+    })
+end
+
+-- إنشاء الألسنة والعناصر
+local MainTab = Window:MakeTab({
+    Title = "Main",
+    Icon = "home"
+})
+
+-- إضافة زر كمثال
+MainTab:AddButton({
+    Title = "زر الاختبار",
+    Callback = function()
+        print("تم النقر على الزر!")
+    end
+})
+
+-- إضافة تبديل كمثال
+MainTab:AddToggle({
+    Title = "وضع الليل",
+    Default = false,
+    Callback = function(Value)
+        print("وضع الليل:", Value)
+    end
+})
+
+-- إضافة شريط تمرير كمثال
+MainTab:AddSlider({
+    Title = "مستوى الصوت",
+    Min = 0,
+    Max = 100,
+    Default = 50,
+    Callback = function(Value)
+        print("الصوت:", Value)
+    end
+})
+
+-- إضافة قسم كمثال
+MainTab:AddSection("الإعدادات العامة")
+
+-- إضافة ملاحظة نصية كمثال
+MainTab:AddParagraph({
+    Title = "تنبيه مهم",
+    Description = "هذه الواجهة تحت التطوير!"
+})
+
+-- إضافة دعوة ديسكورد كمثال
+MainTab:AddDiscordInvite({
+    Title = "سيرفر الدعم",
+    Invite = "https://discord.gg/example"
+})

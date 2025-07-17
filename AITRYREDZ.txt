@@ -1,147 +1,285 @@
-local Library = {}
+-- UgiX UI Library (محدثة ومطورة) --
 
-local ScreenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
-ScreenGui.Name = "UgiX_Library"
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
-local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 500, 0, 270)
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -135)
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.Active = true
-MainFrame.Draggable = true
+local Configs_HUB = {
+  Cor_Hub = Color3.fromRGB(15, 15, 15),
+  Cor_Options = Color3.fromRGB(20, 20, 20),
+  Cor_Stroke = Color3.fromRGB(92, 64, 51),
+  Cor_Text = Color3.fromRGB(180, 180, 180),
+  Cor_DarkText = Color3.fromRGB(240, 240, 240),
+  Corner_Radius = UDim.new(0, 6),
+  Text_Font = Enum.Font.FredokaOne
+}
 
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 8)
+local function Create(instance, parent, props)
+  local new = Instance.new(instance)
+  new.Parent = parent
+  if props then
+    for prop, value in pairs(props) do
+      new[prop] = value
+    end
+  end
+  return new
+end
 
-local CloseButton = Instance.new("TextButton", MainFrame)
-CloseButton.Size = UDim2.new(0, 40, 0, 40)
-CloseButton.Position = UDim2.new(1, -45, 0, 5)
-CloseButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-CloseButton.Text = "×"
-CloseButton.TextScaled = true
-Instance.new("UICorner", CloseButton)
+local function Corner(parent)
+  local c = Create("UICorner", parent)
+  c.CornerRadius = Configs_HUB.Corner_Radius
+  return c
+end
 
-CloseButton.MouseButton1Click:Connect(function()
-	MainFrame.Visible = false
+local function Stroke(parent)
+  local s = Create("UIStroke", parent)
+  s.Color = Configs_HUB.Cor_Stroke
+  s.ApplyStrokeMode = "Border"
+  return s
+end
+
+local function Tween(instance, prop, value, time)
+  local tw = TweenService:Create(instance, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quad), {[prop] = value})
+  tw:Play()
+  return tw
+end
+
+local ScreenGui = CoreGui:FindFirstChild("UgiX_UI")
+if ScreenGui then ScreenGui:Destroy() end
+ScreenGui = Create("ScreenGui", CoreGui)
+ScreenGui.Name = "UgiX_UI"
+
+local Window = Create("Frame", ScreenGui, {
+  Size = UDim2.new(0, 500, 0, 320),
+  Position = UDim2.new(0.5, -250, 0.5, -160),
+  BackgroundColor3 = Configs_HUB.Cor_Hub,
+  Active = true,
+  Draggable = true
+})
+Corner(Window)
+Stroke(Window)
+
+-- Top Bar
+local TopBar = Create("Frame", Window, {
+  Size = UDim2.new(1, 0, 0, 30),
+  BackgroundColor3 = Configs_HUB.Cor_Options
+})
+Corner(TopBar)
+Stroke(TopBar)
+
+local TitleLabel = Create("TextLabel", TopBar, {
+  Text = "UgiX - المطور",
+  Font = Configs_HUB.Text_Font,
+  TextSize = 20,
+  TextColor3 = Configs_HUB.Cor_DarkText,
+  BackgroundTransparency = 1,
+  Size = UDim2.new(1, -80, 1, 0),
+  Position = UDim2.new(0, 10, 0, 0),
+  TextXAlignment = Enum.TextXAlignment.Left,
+  TextYAlignment = Enum.TextYAlignment.Center
+})
+
+-- Close Button
+local CloseBtn = Create("TextButton", TopBar, {
+  Text = "×",
+  Font = Configs_HUB.Text_Font,
+  TextSize = 25,
+  TextColor3 = Color3.fromRGB(240, 60, 60),
+  BackgroundTransparency = 1,
+  Size = UDim2.new(0, 40, 1, 0),
+  Position = UDim2.new(1, -45, 0, 0),
+  AutoButtonColor = false
+})
+Corner(CloseBtn)
+
+CloseBtn.MouseButton1Click:Connect(function()
+  Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.3).Completed:Wait()
+  ScreenGui:Destroy()
 end)
 
-local TabsFrame = Instance.new("Frame", MainFrame)
-TabsFrame.Size = UDim2.new(0, 130, 1, -50)
-TabsFrame.Position = UDim2.new(0, 0, 0, 50)
-TabsFrame.BackgroundTransparency = 1
+-- Content Container
+local Content = Create("ScrollingFrame", Window, {
+  Size = UDim2.new(1, -20, 1, -40),
+  Position = UDim2.new(0, 10, 0, 35),
+  BackgroundTransparency = 1,
+  ScrollBarThickness = 6,
+  CanvasSize = UDim2.new(0, 0, 0, 0),
+  AutomaticCanvasSize = Enum.AutomaticSize.Y,
+  VerticalScrollBarInset = Enum.ScrollBarInset.Always
+})
 
-local UIList = Instance.new("UIListLayout", TabsFrame)
-UIList.Padding = UDim.new(0, 5)
+local UIList = Create("UIListLayout", Content)
+UIList.Padding = UDim.new(0, 8)
 
-local ContentFrame = Instance.new("Frame", MainFrame)
-ContentFrame.Size = UDim2.new(1, -140, 1, -60)
-ContentFrame.Position = UDim2.new(0, 140, 0, 50)
-ContentFrame.BackgroundTransparency = 1
+-- دوال لإضافة العناصر للواجهة --
 
-local Tabs = {}
+local function AddParagraph(parent, texts)
+  local frame = Create("Frame", parent, {
+    BackgroundColor3 = Configs_HUB.Cor_Options,
+    Size = UDim2.new(1, 0, 0, 60),
+  })
+  Corner(frame)
+  Stroke(frame)
 
-function Library.MakeWindow(Config)
-	if Config.Hub and Config.Hub.Animation then
-		local Anim = Instance.new("TextLabel", MainFrame)
-		Anim.Size = UDim2.new(1, 0, 0, 30)
-		Anim.BackgroundTransparency = 1
-		Anim.Text = Config.Hub.Animation
-		Anim.TextColor3 = Color3.fromRGB(200, 200, 200)
-		Anim.TextScaled = true
-		task.spawn(function()
-			task.wait(1.5)
-			Anim:Destroy()
-		end)
-	end
+  local title = Create("TextLabel", frame, {
+    Text = texts[1] or "ملاحظة",
+    Font = Configs_HUB.Text_Font,
+    TextSize = 18,
+    TextColor3 = Configs_HUB.Cor_DarkText,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0, 12, 0, 6),
+    Size = UDim2.new(1, -24, 0, 24),
+    TextXAlignment = Enum.TextXAlignment.Left
+  })
+
+  local content = Create("TextLabel", frame, {
+    Text = texts[2] or "",
+    Font = Enum.Font.Arial,
+    TextSize = 14,
+    TextColor3 = Configs_HUB.Cor_Text,
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0, 12, 0, 30),
+    Size = UDim2.new(1, -24, 0, 24),
+    TextXAlignment = Enum.TextXAlignment.Left,
+    TextWrapped = true
+  })
+
+  return frame
 end
 
-function Library.MakeTab(Config)
-	local TabButton = Instance.new("TextButton", TabsFrame)
-	TabButton.Size = UDim2.new(1, 0, 0, 30)
-	TabButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	TabButton.Text = Config.Name
-	Instance.new("UICorner", TabButton)
+local function AddDiscord(parent, data)
+  local frame = Create("Frame", parent, {
+    BackgroundColor3 = Configs_HUB.Cor_Options,
+    Size = UDim2.new(1, 0, 0, 60)
+  })
+  Corner(frame)
+  Stroke(frame)
 
-	local TabContent = Instance.new("ScrollingFrame", ContentFrame)
-	TabContent.Size = UDim2.new(1, 0, 1, 0)
-	TabContent.Visible = #Tabs == 0
-	TabContent.ScrollBarThickness = 3
-	TabContent.BackgroundTransparency = 1
-	local Layout = Instance.new("UIListLayout", TabContent)
-	Layout.Padding = UDim.new(0, 5)
+  local icon = Create("ImageLabel", frame, {
+    Image = data.DiscordIcon or "",
+    Size = UDim2.new(0, 50, 0, 50),
+    Position = UDim2.new(0, 10, 0, 5),
+    BackgroundTransparency = 1,
+    ScaleType = Enum.ScaleType.Fit
+  })
 
-	TabButton.MouseButton1Click:Connect(function()
-		for _, v in ipairs(ContentFrame:GetChildren()) do
-			if v:IsA("ScrollingFrame") then
-				v.Visible = false
-			end
-		end
-		TabContent.Visible = true
-	end)
+  local btn = Create("TextButton", frame, {
+    Text = data.DiscordTitle or "انضم لديسكوردنا",
+    Font = Configs_HUB.Text_Font,
+    TextSize = 18,
+    TextColor3 = Color3.fromRGB(100, 220, 255),
+    BackgroundTransparency = 1,
+    Position = UDim2.new(0, 70, 0, 10),
+    Size = UDim2.new(1, -80, 0, 40),
+    AutoButtonColor = true,
+    TextXAlignment = Enum.TextXAlignment.Left
+  })
+  Corner(btn)
 
-	table.insert(Tabs, TabContent)
-	return TabContent
+  btn.MouseButton1Click:Connect(function()
+    local success, err = pcall(function()
+      if setclipboard then
+        setclipboard(data.DiscordLink or "")
+      end
+      -- You can add notification here if you want
+    end)
+  end)
+
+  return frame
 end
 
-function Library.AddButton(Tab, Config)
-	local Btn = Instance.new("TextButton", Tab)
-	Btn.Size = UDim2.new(1, -10, 0, 30)
-	Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	Btn.Text = Config.Name
-	Instance.new("UICorner", Btn)
+local function AddImageLabel(parent, data)
+  local frame = Create("Frame", parent, {
+    BackgroundColor3 = Configs_HUB.Cor_Options,
+    Size = UDim2.new(1, 0, 0, 130)
+  })
+  Corner(frame)
+  Stroke(frame)
 
-	Btn.MouseButton1Click:Connect(function()
-		pcall(Config.Callback)
-	end)
+  local img = Create("ImageLabel", frame, {
+    Image = data.Image or "",
+    Size = UDim2.new(1, -20, 1, -20),
+    Position = UDim2.new(0, 10, 0, 10),
+    BackgroundTransparency = 1,
+    ScaleType = Enum.ScaleType.Fit,
+    ClipsDescendants = true
+  })
+
+  return frame
 end
 
-function Library.AddParagraph(Tab, Texts)
-	local Label = Instance.new("TextLabel", Tab)
-	Label.Size = UDim2.new(1, -10, 0, 60)
-	Label.BackgroundTransparency = 1
-	Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-	Label.Text = table.concat(Texts, "\n")
-	Label.TextWrapped = true
+local function AddSection(parent, texts)
+  local label = Create("TextLabel", parent, {
+    Text = texts[1] or "القسم",
+    Font = Configs_HUB.Text_Font,
+    TextSize = 20,
+    TextColor3 = Configs_HUB.Cor_DarkText,
+    BackgroundTransparency = 1,
+    Size = UDim2.new(1, 0, 0, 30),
+    TextXAlignment = Enum.TextXAlignment.Left
+  })
+  return label
 end
 
-function Library.AddDiscord(Tab, Config)
-	local Btn = Instance.new("TextButton", Tab)
-	Btn.Size = UDim2.new(1, -10, 0, 30)
-	Btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	Btn.Text = Config.DiscordTitle
-	Instance.new("UICorner", Btn)
+local function AddButton(parent, data)
+  local btn = Create("TextButton", parent, {
+    Text = data.Name or "زر",
+    Font = Configs_HUB.Text_Font,
+    TextSize = 18,
+    TextColor3 = Configs_HUB.Cor_DarkText,
+    BackgroundColor3 = Configs_HUB.Cor_Options,
+    Size = UDim2.new(1, 0, 0, 40),
+    AutoButtonColor = true
+  })
+  Corner(btn)
+  Stroke(btn)
 
-	Btn.MouseButton1Click:Connect(function()
-		setclipboard(Config.DiscordLink)
-	end)
+  btn.MouseButton1Click:Connect(function()
+    if data.Callback then
+      data.Callback()
+    end
+  end)
+
+  return btn
 end
 
-function Library.AddImageLabel(Tab, Config)
-	local Img = Instance.new("ImageLabel", Tab)
-	Img.Size = UDim2.new(0, 100, 0, 100)
-	Img.Image = Config.Image
-	Img.BackgroundTransparency = 1
+local function MinimizeButton(data)
+  local btn = Create("ImageButton", ScreenGui, {
+    Image = data.Image or "",
+    Size = UDim2.new(0, data.Size[1] or 40, 0, data.Size[2] or 40),
+    BackgroundColor3 = data.Color or Configs_HUB.Cor_Hub,
+    Position = UDim2.new(0, 20, 0, 20),
+    AutoButtonColor = true
+  })
+  if data.Corner then Corner(btn) end
+  if data.Stroke then Stroke(btn) end
+  btn.ZIndex = 10
+
+  local minimized = false
+  btn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    Window.Visible = not minimized
+    if minimized then
+      Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25)
+    else
+      Tween(Window, "Size", UDim2.new(0, 500, 0, 320), 0.25)
+    end
+  end)
+  return btn
 end
 
-function Library.MinimizeButton(Config)
-	local Btn = Instance.new("ImageButton", ScreenGui)
-	Btn.Size = UDim2.new(0, Config.Size[1], 0, Config.Size[2])
-	Btn.Position = UDim2.new(0.1, 0, 0.1, 0)
-	Btn.BackgroundColor3 = Config.Color
-	Btn.Image = Config.Image
-	Btn.Draggable = true
-	if Config.Corner then Instance.new("UICorner", Btn) end
-	if Config.Stroke then
-		local stroke = Instance.new("UIStroke", Btn)
-		stroke.Color = Config.StrokeColor
-	end
+-- يعرض الواجهة كاملة مع أوامر --
 
-	local Min = false
-	Btn.MouseButton1Click:Connect(function()
-		Min = not Min
-		MainFrame.Visible = not Min
-	end)
-end
-
-return Library
+return {
+  MakeWindow = function(configs) end, -- تبقى للمطابقة مع ملفك
+  MakeTab = function(configs)
+    -- لاحظ أن التابات هنا مجرد فريم بسيط بالكونتينر الرئيسي Content
+    -- لأننا نعمل tab واحدة "Main"
+    return Content
+  end,
+  AddParagraph = AddParagraph,
+  AddDiscord = AddDiscord,
+  AddImageLabel = AddImageLabel,
+  AddSection = AddSection,
+  AddButton = AddButton,
+  MinimizeButton = MinimizeButton
+}

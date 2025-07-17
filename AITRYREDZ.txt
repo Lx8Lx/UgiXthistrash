@@ -4,157 +4,174 @@ local PlayerGui = Player:WaitForChild("PlayerGui")
 
 local Library = {}
 
-function CreateUICorner(parent, radius)
+-- دالة لإنشاء UICorner بحواف دائرية
+local function CreateUICorner(parent, radius)
 	local corner = Instance.new("UICorner", parent)
 	corner.CornerRadius = UDim.new(0, radius or 10)
 	return corner
 end
 
+-- دالة لإنشاء نافذة رئيسية
 function MakeWindow(config)
 	local screenGui = Instance.new("ScreenGui", PlayerGui)
 	screenGui.Name = "UgiX_UI"
 	screenGui.ResetOnSpawn = false
+	screenGui.Enabled = true
 
 	local mainFrame = Instance.new("Frame", screenGui)
 	mainFrame.Name = "MainFrame"
-	mainFrame.Size = UDim2.new(0, 600, 0, 400)
-	mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	mainFrame.Visible = true
+	mainFrame.Size = UDim2.new(0, 650, 0, 420)
+	mainFrame.Position = UDim2.new(0.5, -325, 0.5, -210)
+	mainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	mainFrame.Active = true
 	mainFrame.Draggable = true
-	CreateUICorner(mainFrame, 15)
+	CreateUICorner(mainFrame, 20)
 
 	-- Title Bar
 	local titleBar = Instance.new("Frame", mainFrame)
 	titleBar.Name = "TitleBar"
 	titleBar.Size = UDim2.new(1, 0, 0, 50)
-	titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	CreateUICorner(titleBar, 15)
+	titleBar.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	CreateUICorner(titleBar, 20)
 
 	local titleLabel = Instance.new("TextLabel", titleBar)
 	titleLabel.Name = "TitleLabel"
-	titleLabel.Size = UDim2.new(1, -100, 1, 0)
-	titleLabel.Position = UDim2.new(0, 10, 0, 0)
+	titleLabel.Size = UDim2.new(0.7, 0, 1, 0)
+	titleLabel.Position = UDim2.new(0, 20, 0, 0)
 	titleLabel.BackgroundTransparency = 1
 	titleLabel.TextColor3 = Color3.new(1, 1, 1)
 	titleLabel.Font = Enum.Font.GothamBold
 	titleLabel.TextScaled = true
 	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.Text = config.Hub.Title or "UgiX المطور"
+	titleLabel.Text = config.Hub and config.Hub.Title or "UgiX المطور"
 
 	local animationLabel = Instance.new("TextLabel", titleBar)
 	animationLabel.Name = "AnimationLabel"
-	animationLabel.Size = UDim2.new(1, -20, 1, 0)
-	animationLabel.Position = UDim2.new(0, 0, 0, 25)
+	animationLabel.Size = UDim2.new(0.3, -20, 1, 0)
+	animationLabel.Position = UDim2.new(0.7, 0, 0, 0)
 	animationLabel.BackgroundTransparency = 1
 	animationLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 	animationLabel.Font = Enum.Font.Gotham
 	animationLabel.TextScaled = true
-	animationLabel.Text = config.Hub.Animation or "اهلا بك 🌹"
-	animationLabel.TextXAlignment = Enum.TextXAlignment.Left
+	animationLabel.Text = config.Hub and config.Hub.Animation or "اهلا بك 🌹"
+	animationLabel.TextXAlignment = Enum.TextXAlignment.Right
 
-	-- Close Button
+	-- Close Button (X)
 	local closeButton = Instance.new("ImageButton", titleBar)
 	closeButton.Name = "CloseButton"
 	closeButton.Size = UDim2.new(0, 40, 0, 40)
 	closeButton.Position = UDim2.new(1, -50, 0, 5)
-	closeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-	CreateUICorner(closeButton, 12)
-	closeButton.Image = "rbxassetid://76022761932440"
-	closeButton.ImageColor3 = Color3.new(1, 1, 1)
+	closeButton.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+	closeButton.Image = "rbxassetid://76022761932440" -- صورة الغلق
 	closeButton.ScaleType = Enum.ScaleType.Fit
-	closeButton.MouseButton1Click:Connect(function()
-		screenGui.Enabled = false
-	end)
+	CreateUICorner(closeButton, 12)
 
-	-- Open Button (initially hidden)
-	local openButton = Instance.new("TextButton", PlayerGui)
-	openButton.Name = "OpenButton"
-	openButton.Size = UDim2.new(0, 60, 0, 30)
-	openButton.Position = UDim2.new(0, 10, 0.5, -15)
-	openButton.Text = "UgiX"
-	openButton.Font = Enum.Font.GothamBold
-	openButton.TextScaled = true
-	openButton.TextColor3 = Color3.new(1, 1, 1)
-	openButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-	openButton.Active = true
-	openButton.Draggable = true
-	CreateUICorner(openButton, 12)
-	openButton.Visible = false
+	-- Minimize Button (صورة قابلة للضغط)
+	local minimizeButton = Instance.new("ImageButton", titleBar)
+	minimizeButton.Name = "MinimizeButton"
+	minimizeButton.Size = UDim2.new(0, 40, 0, 40)
+	minimizeButton.Position = UDim2.new(1, -100, 0, 5)
+	minimizeButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	minimizeButton.Image = "rbxassetid://116612960959791" -- صورة التصغير
+	minimizeButton.ScaleType = Enum.ScaleType.Fit
+	CreateUICorner(minimizeButton, 12)
 
-	openButton.MouseButton1Click:Connect(function()
-		screenGui.Enabled = true
-		openButton.Visible = false
-	end)
-
-	closeButton.MouseButton1Click:Connect(function()
-		screenGui.Enabled = false
-		openButton.Visible = true
-	end)
-
-	-- Left Tabs Panel
+	-- محتوى النافذة الرئيسية
 	local tabsPanel = Instance.new("Frame", mainFrame)
 	tabsPanel.Name = "TabsPanel"
 	tabsPanel.Size = UDim2.new(0, 140, 1, -50)
 	tabsPanel.Position = UDim2.new(0, 0, 0, 50)
-	tabsPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-	CreateUICorner(tabsPanel, 15)
+	tabsPanel.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	CreateUICorner(tabsPanel, 20)
 
-	-- Content Panel
 	local contentPanel = Instance.new("Frame", mainFrame)
 	contentPanel.Name = "ContentPanel"
 	contentPanel.Size = UDim2.new(1, -140, 1, -50)
 	contentPanel.Position = UDim2.new(0, 140, 0, 50)
-	contentPanel.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-	CreateUICorner(contentPanel, 15)
+	contentPanel.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+	CreateUICorner(contentPanel, 20)
 
+	Library.ScreenGui = screenGui
+	Library.MainFrame = mainFrame
 	Library.TabsPanel = tabsPanel
 	Library.ContentPanel = contentPanel
-	Library.ScreenGui = screenGui
-	Library.OpenButton = openButton
 	Library.Tabs = {}
 	Library.ContentFrames = {}
+
+	-- تفعيل إغلاق الواجهة
+	closeButton.MouseButton1Click:Connect(function()
+		screenGui.Enabled = false
+	end)
+
+	-- تفعيل زر التصغير (Minimize)
+	minimizeButton.MouseButton1Click:Connect(function()
+		screenGui.Enabled = false
+		if not Library.OpenButton then
+			local openBtn = Instance.new("TextButton", PlayerGui)
+			openBtn.Name = "OpenButton"
+			openBtn.Size = UDim2.new(0, 80, 0, 30)
+			openBtn.Position = UDim2.new(0, 10, 0.5, -15)
+			openBtn.Text = "UgiX"
+			openBtn.Font = Enum.Font.GothamBold
+			openBtn.TextScaled = true
+			openBtn.TextColor3 = Color3.new(1, 1, 1)
+			openBtn.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+			CreateUICorner(openBtn, 15)
+			openBtn.Active = true
+			openBtn.Draggable = true
+
+			openBtn.MouseButton1Click:Connect(function()
+				screenGui.Enabled = true
+				openBtn:Destroy()
+				Library.OpenButton = nil
+			end)
+
+			Library.OpenButton = openBtn
+		else
+			Library.OpenButton.Visible = true
+		end
+	end)
 
 	return Library
 end
 
+-- انشاء تبويب جديد
 function MakeTab(config)
 	local tabName = config.Name or "Tab"
 	local tabsPanel = Library.TabsPanel
 	local contentPanel = Library.ContentPanel
 
-	-- Create Tab Button
+	-- إنشاء زر التبويب
 	local tabButton = Instance.new("TextButton", tabsPanel)
 	tabButton.Name = "TabButton_"..tabName
 	tabButton.Size = UDim2.new(1, -20, 0, 50)
-	tabButton.Position = UDim2.new(0, 10, 0, (#tabsPanel:GetChildren()-1)*55)
+	tabButton.Position = UDim2.new(0, 10, 0, (#tabsPanel:GetChildren()-1)*60)
 	tabButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 	tabButton.TextColor3 = Color3.new(1,1,1)
 	tabButton.Font = Enum.Font.GothamBold
 	tabButton.TextScaled = true
 	tabButton.Text = tabName
-	CreateUICorner(tabButton, 12)
+	CreateUICorner(tabButton, 15)
 
-	-- Create Content Frame
+	-- إنشاء إطار المحتوى
 	local contentFrame = Instance.new("ScrollingFrame", contentPanel)
 	contentFrame.Name = "Content_"..tabName
 	contentFrame.Size = UDim2.new(1, -20, 1, -20)
 	contentFrame.Position = UDim2.new(0, 10, 0, 10)
 	contentFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
 	contentFrame.ScrollBarThickness = 8
-	contentFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+	contentFrame.BackgroundColor3 = Color3.fromRGB(85, 85, 85)
 	CreateUICorner(contentFrame, 15)
 	contentFrame.Visible = false
 	contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
-	-- Show first tab content by default
+	-- اظهار التبويب الأول تلقائياً
 	if #Library.Tabs == 0 then
 		contentFrame.Visible = true
 		tabButton.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
 	end
 
-	-- Tab button logic
+	-- حدث تغيير التبويب
 	tabButton.MouseButton1Click:Connect(function()
 		for _, tab in pairs(Library.ContentFrames) do
 			tab.Visible = false
@@ -171,46 +188,49 @@ function MakeTab(config)
 	return contentFrame
 end
 
+-- زر
 function AddButton(parent, config)
 	local buttons = parent:GetChildren()
-	local yOffset = 10 + (#buttons * 50)
+	local yOffset = 10 + (#buttons * 55)
 	local btn = Instance.new("TextButton", parent)
-	btn.Size = UDim2.new(0.95, 0, 0, 45)
+	btn.Size = UDim2.new(0.95, 0, 0, 50)
 	btn.Position = UDim2.new(0, 10, 0, yOffset)
 	btn.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
 	btn.TextColor3 = Color3.new(1,1,1)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextScaled = true
 	btn.Text = config.Name or "Button"
-	CreateUICorner(btn, 10)
+	CreateUICorner(btn, 15)
 	btn.MouseButton1Click:Connect(config.Callback or function() end)
 	return btn
 end
 
+-- فقرة نصية
 function AddParagraph(parent, texts)
-	local yPos = 10 + (#parent:GetChildren() * 50)
+	local yPos = 10 + (#parent:GetChildren() * 55)
 	local label = Instance.new("TextLabel", parent)
-	label.Size = UDim2.new(0.95, 0, 0, 60)
+	label.Size = UDim2.new(0.95, 0, 0, 65)
 	label.Position = UDim2.new(0, 10, 0, yPos)
 	label.BackgroundTransparency = 1
 	label.TextColor3 = Color3.new(1,1,1)
 	label.Font = Enum.Font.GothamBold
 	label.TextScaled = true
-	label.Text = texts[1] or ""
 	label.TextWrapped = true
+	label.Text = table.concat(texts, "\n") or ""
 	return label
 end
 
+-- زر ديسكورد
 function AddDiscord(parent, config)
 	local btn = Instance.new("TextButton", parent)
-	btn.Size = UDim2.new(0.95, 0, 0, 45)
-	btn.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 50))
+	btn.Size = UDim2.new(0.95, 0, 0, 50)
+	btn.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 55))
 	btn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextScaled = true
 	btn.Text = config.DiscordTitle or "Discord"
-	CreateUICorner(btn, 10)
+	CreateUICorner(btn, 15)
 
 	btn.MouseButton1Click:Connect(function()
 		if setclipboard then
@@ -218,59 +238,63 @@ function AddDiscord(parent, config)
 		end
 	end)
 
-	-- Add Discord Icon if exists
 	if config.DiscordIcon then
 		local icon = Instance.new("ImageLabel", btn)
 		icon.Size = UDim2.new(0, 30, 0, 30)
-		icon.Position = UDim2.new(1, -35, 0.5, -15)
+		icon.Position = UDim2.new(1, -35, 0, 10)
 		icon.BackgroundTransparency = 1
 		icon.Image = config.DiscordIcon
 		icon.ScaleType = Enum.ScaleType.Fit
-		CreateUICorner(icon, 8)
+		CreateUICorner(icon, 10)
 	end
 
 	return btn
 end
 
+-- اضافة صورة
 function AddImageLabel(parent, config)
 	local imgLabel = Instance.new("ImageLabel", parent)
-	imgLabel.Size = UDim2.new(0.95, 0, 0, 150)
-	imgLabel.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 155))
+	imgLabel.Size = UDim2.new(0.95, 0, 0, 160)
+	imgLabel.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 165))
 	imgLabel.BackgroundTransparency = 1
 	imgLabel.Image = config.Image or ""
 	imgLabel.ScaleType = Enum.ScaleType.Fit
-	CreateUICorner(imgLabel, 15)
+	CreateUICorner(imgLabel, 20)
 	return imgLabel
 end
 
+-- عنوان قسم
 function AddSection(parent, texts)
-	local yPos = 10 + (#parent:GetChildren() * 50)
+	local yPos = 10 + (#parent:GetChildren() * 55)
 	local label = Instance.new("TextLabel", parent)
-	label.Size = UDim2.new(0.95, 0, 0, 35)
+	label.Size = UDim2.new(0.95, 0, 0, 40)
 	label.Position = UDim2.new(0, 10, 0, yPos)
 	label.BackgroundTransparency = 1
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.Font = Enum.Font.GothamBold
 	label.TextScaled = true
-	label.Text = texts[1] or ""
 	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Text = texts[1] or ""
 	return label
 end
 
+-- زر تصغير مع صورة يدعم التخصيص
 function MinimizeButton(config)
 	if not Library.MainFrame then return end
 
 	local btn = Instance.new("ImageButton", Library.MainFrame)
-	btn.Name = "MinimizeBtn"
+	btn.Name = "MinimizeBtn_"..tostring(math.random(1,100000))
 	btn.Size = UDim2.new(0, config.Size[1], 0, config.Size[2])
-	btn.Position = UDim2.new(1, -config.Size[1] - 10, 0, 60)
+	btn.Position = UDim2.new(1, -config.Size[1] - 15, 0, 60 + (#Library.MainFrame:GetChildren() * 50))
 	btn.BackgroundColor3 = config.Color or Color3.fromRGB(10,10,10)
 	btn.Image = config.Image or ""
-	CreateUICorner(btn, 12)
+	btn.ScaleType = Enum.ScaleType.Fit
+	CreateUICorner(btn, config.Corner and 15 or 0)
 
 	if config.Stroke then
 		local stroke = Instance.new("UIStroke", btn)
 		stroke.Color = config.StrokeColor or Color3.fromRGB(0,0,0)
+		stroke.Thickness = 2
 	end
 
 	btn.MouseButton1Click:Connect(function()
@@ -278,24 +302,9 @@ function MinimizeButton(config)
 			Library.MainFrame.Visible = false
 			if Library.OpenButton then
 				Library.OpenButton.Visible = true
-			end
-		else
-			Library.MainFrame.Visible = true
-			if Library.OpenButton then
-				Library.OpenButton.Visible = false
-			end
-		end
-	end)
-
-	return btn
-end
-
--- تعيين دوال عامة تسهل الاستخدام الخارجي
-_G.MakeWindow = MakeWindow
-_G.MakeTab = MakeTab
-_G.AddButton = AddButton
-_G.AddParagraph = AddParagraph
-_G.AddDiscord = AddDiscord
-_G.AddImageLabel = AddImageLabel
-_G.AddSection = AddSection
-_G.MinimizeButton = MinimizeButton
+			else
+				-- إنشاء زر فتح جديد إذا مافيه
+				local openBtn = Instance.new("TextButton", PlayerGui)
+				openBtn.Name = "OpenButton"
+				openBtn.Size = UDim2.new(0, 80, 0, 30)
+				openBtn.Position = UDim2.new(

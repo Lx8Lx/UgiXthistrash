@@ -1,15 +1,15 @@
--- UgiX UI Library (محدثة ومطورة) --
+-- UgiX UI Library (نسخة محسنة وجذابة)
 
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 
 local Configs_HUB = {
-  Cor_Hub = Color3.fromRGB(15, 15, 15),
-  Cor_Options = Color3.fromRGB(20, 20, 20),
-  Cor_Stroke = Color3.fromRGB(92, 64, 51),
-  Cor_Text = Color3.fromRGB(180, 180, 180),
-  Cor_DarkText = Color3.fromRGB(240, 240, 240),
-  Corner_Radius = UDim.new(0, 6),
+  Cor_Hub = Color3.fromRGB(20, 20, 20),
+  Cor_Options = Color3.fromRGB(35, 35, 35),
+  Cor_Stroke = Color3.fromRGB(150, 100, 65),
+  Cor_Text = Color3.fromRGB(210, 210, 210),
+  Cor_DarkText = Color3.fromRGB(255, 255, 255),
+  Corner_Radius = UDim.new(0, 10),
   Text_Font = Enum.Font.FredokaOne
 }
 
@@ -33,12 +33,13 @@ end
 local function Stroke(parent)
   local s = Create("UIStroke", parent)
   s.Color = Configs_HUB.Cor_Stroke
+  s.Thickness = 2
   s.ApplyStrokeMode = "Border"
   return s
 end
 
 local function Tween(instance, prop, value, time)
-  local tw = TweenService:Create(instance, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quad), {[prop] = value})
+  local tw = TweenService:Create(instance, TweenInfo.new(time or 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {[prop] = value})
   tw:Play()
   return tw
 end
@@ -49,19 +50,21 @@ ScreenGui = Create("ScreenGui", CoreGui)
 ScreenGui.Name = "UgiX_UI"
 
 local Window = Create("Frame", ScreenGui, {
-  Size = UDim2.new(0, 600, 0, 380),
-  Position = UDim2.new(0.5, -300, 0.5, -190),
+  Size = UDim2.new(0, 640, 0, 420),
+  Position = UDim2.new(0.5, -320, 0.5, -210),
   BackgroundColor3 = Configs_HUB.Cor_Hub,
   Active = true,
-  Draggable = true
+  Draggable = true,
+  ClipsDescendants = true
 })
 Corner(Window)
 Stroke(Window)
 
 -- Top Bar
 local TopBar = Create("Frame", Window, {
-  Size = UDim2.new(1, 0, 0, 30),
-  BackgroundColor3 = Configs_HUB.Cor_Options
+  Size = UDim2.new(1, 0, 0, 40),
+  BackgroundColor3 = Configs_HUB.Cor_Options,
+  ZIndex = 2
 })
 Corner(TopBar)
 Stroke(TopBar)
@@ -69,11 +72,11 @@ Stroke(TopBar)
 local TitleLabel = Create("TextLabel", TopBar, {
   Text = "UgiX - المطور",
   Font = Configs_HUB.Text_Font,
-  TextSize = 20,
+  TextSize = 24,
   TextColor3 = Configs_HUB.Cor_DarkText,
   BackgroundTransparency = 1,
-  Size = UDim2.new(1, -90, 1, 0),
-  Position = UDim2.new(0, 10, 0, 0),
+  Size = UDim2.new(1, -130, 1, 0),
+  Position = UDim2.new(0, 20, 0, 0),
   TextXAlignment = Enum.TextXAlignment.Left,
   TextYAlignment = Enum.TextYAlignment.Center
 })
@@ -82,27 +85,40 @@ local TitleLabel = Create("TextLabel", TopBar, {
 local CloseBtn = Create("TextButton", TopBar, {
   Text = "×",
   Font = Configs_HUB.Text_Font,
-  TextSize = 25,
-  TextColor3 = Color3.fromRGB(240, 60, 60),
+  TextSize = 34,
+  TextColor3 = Color3.fromRGB(255, 70, 70),
   BackgroundTransparency = 1,
-  Size = UDim2.new(0, 40, 1, 0),
-  Position = UDim2.new(1, -45, 0, 0),
-  AutoButtonColor = false
+  Size = UDim2.new(0, 50, 1, 0),
+  Position = UDim2.new(1, -70, 0, 0),
+  AutoButtonColor = false,
+  ZIndex = 3,
+  Modal = true,
+  ClipsDescendants = false,
+  AutoLocalize = false
 })
 Corner(CloseBtn)
 
+CloseBtn.MouseEnter:Connect(function()
+  Tween(CloseBtn, "TextColor3", Color3.fromRGB(255, 120, 120), 0.15)
+end)
+CloseBtn.MouseLeave:Connect(function()
+  Tween(CloseBtn, "TextColor3", Color3.fromRGB(255, 70, 70), 0.15)
+end)
+
 CloseBtn.MouseButton1Click:Connect(function()
-  Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.3).Completed:Wait()
+  Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.3):Wait()
   ScreenGui:Destroy()
 end)
 
--- Minimize Button (أعلى اليسار)
+-- Minimize Button
 local MinBtn = Create("ImageButton", TopBar, {
   Image = "rbxassetid://116612960959791",
-  Size = UDim2.new(0, 35, 0, 25),
-  Position = UDim2.new(1, -90, 0, 2),
+  Size = UDim2.new(0, 38, 0, 28),
+  Position = UDim2.new(1, -120, 0, 6),
   BackgroundColor3 = Configs_HUB.Cor_Options,
-  AutoButtonColor = true
+  AutoButtonColor = true,
+  ZIndex = 3,
+  ClipsDescendants = false
 })
 Corner(MinBtn)
 Stroke(MinBtn)
@@ -110,55 +126,54 @@ Stroke(MinBtn)
 local minimized = false
 MinBtn.MouseButton1Click:Connect(function()
   minimized = not minimized
-  Window.Visible = not minimized
   if minimized then
-    Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25)
+    Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25):Wait()
+    Window.Visible = false
   else
-    Tween(Window, "Size", UDim2.new(0, 600, 0, 380), 0.25)
+    Window.Visible = true
+    Tween(Window, "Size", UDim2.new(0, 640, 0, 420), 0.25)
   end
 end)
 
--- Tabs Container (على اليسار)
+-- Tabs Container (اليسار)
 local TabsContainer = Create("Frame", Window, {
-  Size = UDim2.new(0, 140, 1, -40),
-  Position = UDim2.new(0, 10, 0, 35),
+  Size = UDim2.new(0, 180, 1, -50),
+  Position = UDim2.new(0, 10, 0, 45),
   BackgroundColor3 = Configs_HUB.Cor_Options,
+  ClipsDescendants = true
 })
 Corner(TabsContainer)
 Stroke(TabsContainer)
 
 local TabsLayout = Create("UIListLayout", TabsContainer)
 TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-TabsLayout.Padding = UDim.new(0, 5)
+TabsLayout.Padding = UDim.new(0, 12)
 
 -- Content Container (يمين التبويبات)
 local ContentContainer = Create("Frame", Window, {
-  Size = UDim2.new(1, -160, 1, -40),
-  Position = UDim2.new(0, 160, 0, 35),
+  Size = UDim2.new(1, -200, 1, -50),
+  Position = UDim2.new(0, 200, 0, 45),
   BackgroundColor3 = Configs_HUB.Cor_Options,
+  ClipsDescendants = true
 })
 Corner(ContentContainer)
 Stroke(ContentContainer)
 
--- لإضافة تبويب جديد
+-- جدول التبويبات والمحتويات
 local tabs = {}
 local contents = {}
-
-local function ClearContents()
-  for _, frame in pairs(contents) do
-    frame.Visible = false
-  end
-end
 
 local function ActivateTab(index)
   for i, tabBtn in ipairs(tabs) do
     if i == index then
-      tabBtn.BackgroundColor3 = Color3.fromRGB(92, 64, 51)
+      tabBtn.BackgroundColor3 = Color3.fromRGB(165, 115, 75)
       tabBtn.TextColor3 = Configs_HUB.Cor_DarkText
+      tabBtn.Font = Enum.Font.FredokaOne
       contents[i].Visible = true
     else
       tabBtn.BackgroundColor3 = Configs_HUB.Cor_Options
       tabBtn.TextColor3 = Configs_HUB.Cor_Text
+      tabBtn.Font = Enum.Font.Gotham
       contents[i].Visible = false
     end
   end
@@ -167,62 +182,77 @@ end
 local function MakeTab(name)
   local tabBtn = Create("TextButton", TabsContainer, {
     Text = name,
-    Font = Configs_HUB.Text_Font,
-    TextSize = 18,
+    Font = Enum.Font.Gotham,
+    TextSize = 21,
     TextColor3 = Configs_HUB.Cor_Text,
     BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 40),
+    Size = UDim2.new(1, 0, 0, 52),
     AutoButtonColor = true
   })
   Corner(tabBtn)
   Stroke(tabBtn)
 
   local contentFrame = Create("ScrollingFrame", ContentContainer, {
-    Size = UDim2.new(1, -10, 1, -10),
-    Position = UDim2.new(0, 5, 0, 5),
+    Size = UDim2.new(1, -16, 1, -16),
+    Position = UDim2.new(0, 8, 0, 8),
     BackgroundTransparency = 1,
-    ScrollBarThickness = 6,
+    ScrollBarThickness = 7,
     CanvasSize = UDim2.new(0, 0, 0, 0),
     AutomaticCanvasSize = Enum.AutomaticSize.Y,
-    VerticalScrollBarInset = Enum.ScrollBarInset.Always
+    VerticalScrollBarInset = Enum.ScrollBarInset.Always,
+    ClipsDescendants = true
   })
 
   local layout = Create("UIListLayout", contentFrame)
-  layout.Padding = UDim.new(0, 8)
+  layout.Padding = UDim.new(0, 14)
   layout.SortOrder = Enum.SortOrder.LayoutOrder
 
   table.insert(tabs, tabBtn)
   table.insert(contents, contentFrame)
 
+  local tabIndex = #tabs
   tabBtn.MouseButton1Click:Connect(function()
-    ActivateTab(#tabs)
+    ActivateTab(tabIndex)
   end)
 
-  -- لو هذا أول تبويب، نظهره تلقائياً
-  if #tabs == 1 then
+  -- تفعيل التبويب الأول تلقائيًا
+  if tabIndex == 1 then
     ActivateTab(1)
   end
+
+  -- تأثير عند المرور
+  tabBtn.MouseEnter:Connect(function()
+    if tabBtn.BackgroundColor3 ~= Color3.fromRGB(165,115,75) then
+      Tween(tabBtn, "BackgroundColor3", Color3.fromRGB(90, 65, 45), 0.2)
+    end
+  end)
+  tabBtn.MouseLeave:Connect(function()
+    if tabBtn.BackgroundColor3 ~= Color3.fromRGB(165,115,75) then
+      Tween(tabBtn, "BackgroundColor3", Configs_HUB.Cor_Options, 0.2)
+    end
+  end)
 
   return contentFrame
 end
 
--- دوال لإضافة العناصر للتاب
+-- دوال لإضافة العناصر داخل التبويب
 
 local function AddParagraph(parent, texts)
   local frame = Create("Frame", parent, {
     BackgroundColor3 = Configs_HUB.Cor_Hub,
-    Size = UDim2.new(1, 0, 0, 70),
+    Size = UDim2.new(1, 0, 0, 80),
   })
   Corner(frame)
+  Stroke(frame)
 
   local title = Create("TextLabel", frame, {
     Text = texts[1] or "ملاحظة",
     Font = Configs_HUB.Text_Font,
-    TextSize = 20,
+    TextSize = 22,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 12, 0, 6),
-    Size = UDim2.new(1, -24, 0, 30),
+    Position = UDim2.new(0, 15, 0, 10),
+    Size = UDim2.new(1, -30, 0, 36),
     TextXAlignment = Enum.TextXAlignment.Left
   })
 
@@ -232,8 +262,8 @@ local function AddParagraph(parent, texts)
     TextSize = 16,
     TextColor3 = Configs_HUB.Cor_Text,
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 12, 0, 36),
-    Size = UDim2.new(1, -24, 0, 30),
+    Position = UDim2.new(0, 15, 0, 48),
+    Size = UDim2.new(1, -30, 0, 30),
     TextXAlignment = Enum.TextXAlignment.Left,
     TextWrapped = true
   })
@@ -244,14 +274,15 @@ end
 local function AddDiscord(parent, data)
   local frame = Create("Frame", parent, {
     BackgroundColor3 = Configs_HUB.Cor_Hub,
-    Size = UDim2.new(1, 0, 0, 70)
+    Size = UDim2.new(1, 0, 0, 75)
   })
   Corner(frame)
+  Stroke(frame)
 
   local icon = Create("ImageLabel", frame, {
     Image = data.DiscordIcon or "",
-    Size = UDim2.new(0, 50, 0, 50),
-    Position = UDim2.new(0, 10, 0, 10),
+    Size = UDim2.new(0, 56, 0, 56),
+    Position = UDim2.new(0, 15, 0, 10),
     BackgroundTransparency = 1,
     ScaleType = Enum.ScaleType.Fit
   })
@@ -259,11 +290,11 @@ local function AddDiscord(parent, data)
   local btn = Create("TextButton", frame, {
     Text = data.DiscordTitle or "انضم لديسكوردنا",
     Font = Configs_HUB.Text_Font,
-    TextSize = 18,
-    TextColor3 = Color3.fromRGB(100, 220, 255),
+    TextSize = 20,
+    TextColor3 = Color3.fromRGB(110, 220, 255),
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 70, 0, 15),
-    Size = UDim2.new(1, -80, 0, 40),
+    Position = UDim2.new(0, 85, 0, 17),
+    Size = UDim2.new(1, -100, 0, 45),
     AutoButtonColor = true,
     TextXAlignment = Enum.TextXAlignment.Left
   })
@@ -283,14 +314,15 @@ end
 local function AddImageLabel(parent, data)
   local frame = Create("Frame", parent, {
     BackgroundColor3 = Configs_HUB.Cor_Hub,
-    Size = UDim2.new(1, 0, 0, 140)
+    Size = UDim2.new(1, 0, 0, 150)
   })
   Corner(frame)
+  Stroke(frame)
 
   local img = Create("ImageLabel", frame, {
     Image = data.Image or "",
-    Size = UDim2.new(1, -20, 1, -20),
-    Position = UDim2.new(0, 10, 0, 10),
+    Size = UDim2.new(1, -28, 1, -28),
+    Position = UDim2.new(0, 14, 0, 14),
     BackgroundTransparency = 1,
     ScaleType = Enum.ScaleType.Fit,
     ClipsDescendants = true
@@ -303,10 +335,10 @@ local function AddSection(parent, texts)
   local label = Create("TextLabel", parent, {
     Text = texts[1] or "القسم",
     Font = Configs_HUB.Text_Font,
-    TextSize = 22,
+    TextSize = 26,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundTransparency = 1,
-    Size = UDim2.new(1, 0, 0, 35),
+    Size = UDim2.new(1, 0, 0, 42),
     TextXAlignment = Enum.TextXAlignment.Left
   })
   return label
@@ -316,10 +348,10 @@ local function AddButton(parent, data)
   local btn = Create("TextButton", parent, {
     Text = data.Name or "زر",
     Font = Configs_HUB.Text_Font,
-    TextSize = 18,
+    TextSize = 22,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 45),
+    Size = UDim2.new(1, 0, 0, 52),
     AutoButtonColor = true
   })
   Corner(btn)
@@ -329,6 +361,13 @@ local function AddButton(parent, data)
     if data.Callback then
       data.Callback()
     end
+  end)
+
+  btn.MouseEnter:Connect(function()
+    Tween(btn, "BackgroundColor3", Color3.fromRGB(175, 125, 85), 0.25)
+  end)
+  btn.MouseLeave:Connect(function()
+    Tween(btn, "BackgroundColor3", Configs_HUB.Cor_Options, 0.25)
   end)
 
   return btn
@@ -353,19 +392,14 @@ local function MinimizeButton(data)
     if minimized then
       Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25)
     else
-      Tween(Window, "Size", UDim2.new(0, 600, 0, 380), 0.25)
+      Tween(Window, "Size", UDim2.new(0, 640, 0, 420), 0.25)
     end
   end)
   return btn
 end
 
--- إضافة التبويبات والواجهة الرئيسية --
-
 return {
-  MakeWindow = function(configs) end, -- لمطابقة ملفك القديم (يمكن تعديله)
-  
   MakeTab = MakeTab,
-  
   AddParagraph = AddParagraph,
   AddDiscord = AddDiscord,
   AddImageLabel = AddImageLabel,

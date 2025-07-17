@@ -1,194 +1,124 @@
--- BetterRedz_UI: Full Feature Custom UI Library (Night Mode, Large Scale)
+local Library = {}
 
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local CoreGui = game:GetService("CoreGui")
-local Player = Players.LocalPlayer
+function MakeWindow(config)
+	local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer:WaitForChild("PlayerGui"))
+	ScreenGui.Name = "UgiX_Loader"
+	ScreenGui.ResetOnSpawn = false
 
-local BetterRedz = {
-    Tabs = {},
-    Flags = {},
-    Connections = {},
-    Theme = {
-        Background = Color3.fromRGB(20, 20, 20),
-        Accent = Color3.fromRGB(85, 170, 255),
-        Text = Color3.fromRGB(240, 240, 240),
-        Section = Color3.fromRGB(30, 30, 30),
-        Input = Color3.fromRGB(40, 40, 40)
-    },
-    UISize = UDim2.new(0, 700, 0, 480)
-}
+	local MainFrame = Instance.new("Frame", ScreenGui)
+	MainFrame.Size = UDim2.new(0, 500, 0, 300)
+	MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
+	MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	MainFrame.Visible = true
+	MainFrame.Active = true
+	MainFrame.Draggable = true
 
-local function CreateInstance(class, props)
-    local inst = Instance.new(class)
-    for i, v in pairs(props) do
-        inst[i] = v
-    end
-    return inst
+	local Title = Instance.new("TextLabel", MainFrame)
+	Title.Size = UDim2.new(1, 0, 0, 50)
+	Title.BackgroundTransparency = 1
+	Title.Text = config.Hub.Title .. " - " .. (config.Hub.Animation or "")
+	Title.TextColor3 = Color3.new(1,1,1)
+	Title.Font = Enum.Font.GothamBold
+	Title.TextScaled = true
+
+	local TabFolder = Instance.new("Folder", MainFrame)
+	TabFolder.Name = "Tabs"
+
+	Library.MainFrame = MainFrame
+	Library.TabFolder = TabFolder
 end
 
-local function AddPadding(ui)
-    local padding = Instance.new("UIPadding")
-    padding.PaddingTop = UDim.new(0, 6)
-    padding.PaddingBottom = UDim.new(0, 6)
-    padding.PaddingLeft = UDim.new(0, 10)
-    padding.PaddingRight = UDim.new(0, 10)
-    padding.Parent = ui
+function MakeTab(config)
+	local Tab = Instance.new("Frame", Library.TabFolder)
+	Tab.Name = config.Name
+	Tab.Size = UDim2.new(1, 0, 1, -50)
+	Tab.Position = UDim2.new(0, 0, 0, 50)
+	Tab.BackgroundTransparency = 1
+
+	return Tab
 end
 
-function BetterRedz:Tab(name)
-    local ScreenGui = CreateInstance("ScreenGui", {
-        Name = "BetterRedzUI_" .. name,
-        ResetOnSpawn = false,
-        Parent = CoreGui
-    })
-
-    local MainFrame = CreateInstance("Frame", {
-        Name = "Main",
-        Size = self.UISize,
-        BackgroundColor3 = self.Theme.Background,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0.5, -self.UISize.X.Offset/2, 0.5, -self.UISize.Y.Offset/2),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Parent = ScreenGui
-    })
-
-    local UIListLayout = Instance.new("UIListLayout", MainFrame)
-    UIListLayout.Padding = UDim.new(0, 8)
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    local Tab = {
-        Sections = {},
-        Frame = MainFrame
-    }
-
-    function Tab:Section(title)
-        local section = CreateInstance("Frame", {
-            Size = UDim2.new(1, -20, 0, 60),
-            BackgroundColor3 = BetterRedz.Theme.Section,
-            BorderSizePixel = 0,
-            Parent = MainFrame
-        })
-        AddPadding(section)
-
-        local label = CreateInstance("TextLabel", {
-            Text = title,
-            Font = Enum.Font.GothamBold,
-            TextSize = 16,
-            TextColor3 = BetterRedz.Theme.Text,
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, 20),
-            Parent = section
-        })
-
-        return section
-    end
-
-    function Tab:Button(tbl)
-        local btn = CreateInstance("TextButton", {
-            Text = tbl.Text or "Button",
-            Size = UDim2.new(1, -20, 0, 30),
-            BackgroundColor3 = BetterRedz.Theme.Accent,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-        btn.MouseButton1Click:Connect(function()
-            pcall(tbl.Callback)
-        end)
-    end
-
-    function Tab:Toggle(tbl)
-        local flag = tbl.Flag
-        BetterRedz.Flags[flag] = tbl.Default or false
-
-        local toggle = CreateInstance("TextButton", {
-            Text = tbl.Text .. ": " .. (BetterRedz.Flags[flag] and "ON" or "OFF"),
-            Size = UDim2.new(1, -20, 0, 30),
-            BackgroundColor3 = BetterRedz.Theme.Input,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-
-        toggle.MouseButton1Click:Connect(function()
-            BetterRedz.Flags[flag] = not BetterRedz.Flags[flag]
-            toggle.Text = tbl.Text .. ": " .. (BetterRedz.Flags[flag] and "ON" or "OFF")
-            pcall(tbl.Callback, BetterRedz.Flags[flag])
-        end)
-    end
-
-    function Tab:Slider(tbl)
-        local value = tbl.Default or tbl.Min
-        local slider = CreateInstance("TextButton", {
-            Text = tbl.Text .. ": " .. value,
-            Size = UDim2.new(1, -20, 0, 30),
-            BackgroundColor3 = BetterRedz.Theme.Input,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-        slider.MouseButton1Click:Connect(function()
-            value = value + 1
-            if value > tbl.Max then value = tbl.Min end
-            slider.Text = tbl.Text .. ": " .. value
-            pcall(tbl.Callback, value)
-        end)
-    end
-
-    function Tab:Label(tbl)
-        CreateInstance("TextLabel", {
-            Text = tbl.Text,
-            Size = UDim2.new(1, -20, 0, 24),
-            BackgroundTransparency = 1,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-    end
-
-    function Tab:Textbox(tbl)
-        local box = CreateInstance("TextBox", {
-            PlaceholderText = tbl.Text or "Type...",
-            Size = UDim2.new(1, -20, 0, 30),
-            BackgroundColor3 = BetterRedz.Theme.Input,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-        box.FocusLost:Connect(function()
-            pcall(tbl.Callback, box.Text)
-        end)
-    end
-
-    function Tab:Dropdown(tbl)
-        local selected = tbl.Default or tbl.List[1]
-        local dropdown = CreateInstance("TextButton", {
-            Text = tbl.Text .. ": " .. selected,
-            Size = UDim2.new(1, -20, 0, 30),
-            BackgroundColor3 = BetterRedz.Theme.Input,
-            TextColor3 = BetterRedz.Theme.Text,
-            Font = Enum.Font.Gotham,
-            TextSize = 14,
-            Parent = MainFrame
-        })
-        dropdown.MouseButton1Click:Connect(function()
-            local idx = table.find(tbl.List, selected) or 0
-            idx = idx + 1
-            if idx > #tbl.List then idx = 1 end
-            selected = tbl.List[idx]
-            dropdown.Text = tbl.Text .. ": " .. selected
-            pcall(tbl.Callback, selected)
-        end)
-    end
-
-    return Tab
+function AddButton(parent, config)
+	local Button = Instance.new("TextButton", parent)
+	Button.Size = UDim2.new(0, 200, 0, 40)
+	Button.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*45)
+	Button.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+	Button.TextColor3 = Color3.new(1, 1, 1)
+	Button.Font = Enum.Font.GothamBold
+	Button.TextScaled = true
+	Button.Text = config.Name
+	Button.MouseButton1Click:Connect(config.Callback)
 end
 
-return BetterRedz
+function AddParagraph(parent, config)
+	local Text = Instance.new("TextLabel", parent)
+	Text.Size = UDim2.new(1, -20, 0, 60)
+	Text.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*65)
+	Text.BackgroundTransparency = 1
+	Text.TextColor3 = Color3.new(1,1,1)
+	Text.Font = Enum.Font.GothamBold
+	Text.TextScaled = true
+	Text.Text = config[1]
+end
+
+function AddDiscord(parent, config)
+	local Button = Instance.new("TextButton", parent)
+	Button.Size = UDim2.new(0, 200, 0, 40)
+	Button.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*45)
+	Button.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+	Button.TextColor3 = Color3.new(1, 1, 1)
+	Button.Font = Enum.Font.GothamBold
+	Button.TextScaled = true
+	Button.Text = config.DiscordTitle
+	Button.MouseButton1Click:Connect(function()
+		if setclipboard then
+			setclipboard(config.DiscordLink)
+		end
+	end)
+end
+
+function AddImageLabel(parent, config)
+	local ImageLabel = Instance.new("ImageLabel", parent)
+	ImageLabel.Size = UDim2.new(0, 100, 0, 100)
+	ImageLabel.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*110)
+	ImageLabel.BackgroundTransparency = 1
+	ImageLabel.Image = config.Image
+end
+
+function AddSection(parent, config)
+	local Section = Instance.new("TextLabel", parent)
+	Section.Size = UDim2.new(1, -20, 0, 30)
+	Section.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*35)
+	Section.BackgroundTransparency = 1
+	Section.TextColor3 = Color3.new(1, 1, 1)
+	Section.Font = Enum.Font.GothamBold
+	Section.TextScaled = true
+	Section.Text = config[1]
+end
+
+function MinimizeButton(config)
+	local Button = Instance.new("ImageButton", Library.MainFrame)
+	Button.Size = UDim2.new(0, config.Size[1], 0, config.Size[2])
+	Button.Position = UDim2.new(1, -config.Size[1] - 10, 0, 10)
+	Button.Image = config.Image
+	Button.BackgroundColor3 = config.Color
+	if config.Corner then
+		local UICorner = Instance.new("UICorner", Button)
+	end
+	if config.Stroke then
+		local UIStroke = Instance.new("UIStroke", Button)
+		UIStroke.Color = config.StrokeColor
+	end
+	Button.MouseButton1Click:Connect(function()
+		Library.MainFrame.Visible = not Library.MainFrame.Visible
+	end)
+end
+
+_G.MakeWindow = MakeWindow
+_G.MakeTab = MakeTab
+_G.AddButton = AddButton
+_G.AddParagraph = AddParagraph
+_G.AddDiscord = AddDiscord
+_G.AddImageLabel = AddImageLabel
+_G.AddSection = AddSection
+_G.MinimizeButton = MinimizeButton

@@ -1,119 +1,296 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
 local Library = {}
 
+function CreateUICorner(parent, radius)
+	local corner = Instance.new("UICorner", parent)
+	corner.CornerRadius = UDim.new(0, radius or 10)
+	return corner
+end
+
 function MakeWindow(config)
-	local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer:WaitForChild("PlayerGui"))
-	ScreenGui.Name = "UgiX_Loader"
-	ScreenGui.ResetOnSpawn = false
+	local screenGui = Instance.new("ScreenGui", PlayerGui)
+	screenGui.Name = "UgiX_UI"
+	screenGui.ResetOnSpawn = false
 
-	local MainFrame = Instance.new("Frame", ScreenGui)
-	MainFrame.Size = UDim2.new(0, 500, 0, 300)
-	MainFrame.Position = UDim2.new(0.5, -250, 0.5, -150)
-	MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-	MainFrame.Visible = true
-	MainFrame.Active = true
-	MainFrame.Draggable = true
+	local mainFrame = Instance.new("Frame", screenGui)
+	mainFrame.Name = "MainFrame"
+	mainFrame.Size = UDim2.new(0, 600, 0, 400)
+	mainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+	mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	mainFrame.Visible = true
+	mainFrame.Active = true
+	mainFrame.Draggable = true
+	CreateUICorner(mainFrame, 15)
 
-	local Title = Instance.new("TextLabel", MainFrame)
-	Title.Size = UDim2.new(1, 0, 0, 50)
-	Title.BackgroundTransparency = 1
-	Title.Text = config.Hub.Title .. " - " .. (config.Hub.Animation or "")
-	Title.TextColor3 = Color3.new(1,1,1)
-	Title.Font = Enum.Font.GothamBold
-	Title.TextScaled = true
+	-- Title Bar
+	local titleBar = Instance.new("Frame", mainFrame)
+	titleBar.Name = "TitleBar"
+	titleBar.Size = UDim2.new(1, 0, 0, 50)
+	titleBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	CreateUICorner(titleBar, 15)
 
-	local TabFolder = Instance.new("Folder", MainFrame)
-	TabFolder.Name = "Tabs"
+	local titleLabel = Instance.new("TextLabel", titleBar)
+	titleLabel.Name = "TitleLabel"
+	titleLabel.Size = UDim2.new(1, -100, 1, 0)
+	titleLabel.Position = UDim2.new(0, 10, 0, 0)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.TextColor3 = Color3.new(1, 1, 1)
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextScaled = true
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	titleLabel.Text = config.Hub.Title or "UgiX المطور"
 
-	Library.MainFrame = MainFrame
-	Library.TabFolder = TabFolder
+	local animationLabel = Instance.new("TextLabel", titleBar)
+	animationLabel.Name = "AnimationLabel"
+	animationLabel.Size = UDim2.new(1, -20, 1, 0)
+	animationLabel.Position = UDim2.new(0, 0, 0, 25)
+	animationLabel.BackgroundTransparency = 1
+	animationLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+	animationLabel.Font = Enum.Font.Gotham
+	animationLabel.TextScaled = true
+	animationLabel.Text = config.Hub.Animation or "اهلا بك 🌹"
+	animationLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	-- Close Button
+	local closeButton = Instance.new("ImageButton", titleBar)
+	closeButton.Name = "CloseButton"
+	closeButton.Size = UDim2.new(0, 40, 0, 40)
+	closeButton.Position = UDim2.new(1, -50, 0, 5)
+	closeButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+	CreateUICorner(closeButton, 12)
+	closeButton.Image = "rbxassetid://76022761932440"
+	closeButton.ImageColor3 = Color3.new(1, 1, 1)
+	closeButton.ScaleType = Enum.ScaleType.Fit
+	closeButton.MouseButton1Click:Connect(function()
+		screenGui.Enabled = false
+	end)
+
+	-- Open Button (initially hidden)
+	local openButton = Instance.new("TextButton", PlayerGui)
+	openButton.Name = "OpenButton"
+	openButton.Size = UDim2.new(0, 60, 0, 30)
+	openButton.Position = UDim2.new(0, 10, 0.5, -15)
+	openButton.Text = "UgiX"
+	openButton.Font = Enum.Font.GothamBold
+	openButton.TextScaled = true
+	openButton.TextColor3 = Color3.new(1, 1, 1)
+	openButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+	openButton.Active = true
+	openButton.Draggable = true
+	CreateUICorner(openButton, 12)
+	openButton.Visible = false
+
+	openButton.MouseButton1Click:Connect(function()
+		screenGui.Enabled = true
+		openButton.Visible = false
+	end)
+
+	closeButton.MouseButton1Click:Connect(function()
+		screenGui.Enabled = false
+		openButton.Visible = true
+	end)
+
+	-- Left Tabs Panel
+	local tabsPanel = Instance.new("Frame", mainFrame)
+	tabsPanel.Name = "TabsPanel"
+	tabsPanel.Size = UDim2.new(0, 140, 1, -50)
+	tabsPanel.Position = UDim2.new(0, 0, 0, 50)
+	tabsPanel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	CreateUICorner(tabsPanel, 15)
+
+	-- Content Panel
+	local contentPanel = Instance.new("Frame", mainFrame)
+	contentPanel.Name = "ContentPanel"
+	contentPanel.Size = UDim2.new(1, -140, 1, -50)
+	contentPanel.Position = UDim2.new(0, 140, 0, 50)
+	contentPanel.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+	CreateUICorner(contentPanel, 15)
+
+	Library.TabsPanel = tabsPanel
+	Library.ContentPanel = contentPanel
+	Library.ScreenGui = screenGui
+	Library.OpenButton = openButton
+	Library.Tabs = {}
+	Library.ContentFrames = {}
+
+	return Library
 end
 
 function MakeTab(config)
-	local Tab = Instance.new("Frame", Library.TabFolder)
-	Tab.Name = config.Name
-	Tab.Size = UDim2.new(1, 0, 1, -50)
-	Tab.Position = UDim2.new(0, 0, 0, 50)
-	Tab.BackgroundTransparency = 1
+	local tabName = config.Name or "Tab"
+	local tabsPanel = Library.TabsPanel
+	local contentPanel = Library.ContentPanel
 
-	return Tab
+	-- Create Tab Button
+	local tabButton = Instance.new("TextButton", tabsPanel)
+	tabButton.Name = "TabButton_"..tabName
+	tabButton.Size = UDim2.new(1, -20, 0, 50)
+	tabButton.Position = UDim2.new(0, 10, 0, (#tabsPanel:GetChildren()-1)*55)
+	tabButton.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+	tabButton.TextColor3 = Color3.new(1,1,1)
+	tabButton.Font = Enum.Font.GothamBold
+	tabButton.TextScaled = true
+	tabButton.Text = tabName
+	CreateUICorner(tabButton, 12)
+
+	-- Create Content Frame
+	local contentFrame = Instance.new("ScrollingFrame", contentPanel)
+	contentFrame.Name = "Content_"..tabName
+	contentFrame.Size = UDim2.new(1, -20, 1, -20)
+	contentFrame.Position = UDim2.new(0, 10, 0, 10)
+	contentFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+	contentFrame.ScrollBarThickness = 8
+	contentFrame.BackgroundColor3 = Color3.fromRGB(65, 65, 65)
+	CreateUICorner(contentFrame, 15)
+	contentFrame.Visible = false
+	contentFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+	-- Show first tab content by default
+	if #Library.Tabs == 0 then
+		contentFrame.Visible = true
+		tabButton.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+	end
+
+	-- Tab button logic
+	tabButton.MouseButton1Click:Connect(function()
+		for _, tab in pairs(Library.ContentFrames) do
+			tab.Visible = false
+		end
+		for _, btn in pairs(Library.Tabs) do
+			btn.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+		end
+		contentFrame.Visible = true
+		tabButton.BackgroundColor3 = Color3.fromRGB(200, 30, 30)
+	end)
+
+	table.insert(Library.Tabs, tabButton)
+	Library.ContentFrames[tabName] = contentFrame
+	return contentFrame
 end
 
 function AddButton(parent, config)
-	local Button = Instance.new("TextButton", parent)
-	Button.Size = UDim2.new(0, 200, 0, 40)
-	Button.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*45)
-	Button.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-	Button.TextColor3 = Color3.new(1, 1, 1)
-	Button.Font = Enum.Font.GothamBold
-	Button.TextScaled = true
-	Button.Text = config.Name
-	Button.MouseButton1Click:Connect(config.Callback)
+	local buttons = parent:GetChildren()
+	local yOffset = 10 + (#buttons * 50)
+	local btn = Instance.new("TextButton", parent)
+	btn.Size = UDim2.new(0.95, 0, 0, 45)
+	btn.Position = UDim2.new(0, 10, 0, yOffset)
+	btn.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextScaled = true
+	btn.Text = config.Name or "Button"
+	CreateUICorner(btn, 10)
+	btn.MouseButton1Click:Connect(config.Callback or function() end)
+	return btn
 end
 
-function AddParagraph(parent, config)
-	local Text = Instance.new("TextLabel", parent)
-	Text.Size = UDim2.new(1, -20, 0, 60)
-	Text.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*65)
-	Text.BackgroundTransparency = 1
-	Text.TextColor3 = Color3.new(1,1,1)
-	Text.Font = Enum.Font.GothamBold
-	Text.TextScaled = true
-	Text.Text = config[1]
+function AddParagraph(parent, texts)
+	local yPos = 10 + (#parent:GetChildren() * 50)
+	local label = Instance.new("TextLabel", parent)
+	label.Size = UDim2.new(0.95, 0, 0, 60)
+	label.Position = UDim2.new(0, 10, 0, yPos)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1,1,1)
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+	label.Text = texts[1] or ""
+	label.TextWrapped = true
+	return label
 end
 
 function AddDiscord(parent, config)
-	local Button = Instance.new("TextButton", parent)
-	Button.Size = UDim2.new(0, 200, 0, 40)
-	Button.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*45)
-	Button.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-	Button.TextColor3 = Color3.new(1, 1, 1)
-	Button.Font = Enum.Font.GothamBold
-	Button.TextScaled = true
-	Button.Text = config.DiscordTitle
-	Button.MouseButton1Click:Connect(function()
+	local btn = Instance.new("TextButton", parent)
+	btn.Size = UDim2.new(0.95, 0, 0, 45)
+	btn.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 50))
+	btn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextScaled = true
+	btn.Text = config.DiscordTitle or "Discord"
+	CreateUICorner(btn, 10)
+
+	btn.MouseButton1Click:Connect(function()
 		if setclipboard then
-			setclipboard(config.DiscordLink)
+			setclipboard(config.DiscordLink or "")
 		end
 	end)
+
+	-- Add Discord Icon if exists
+	if config.DiscordIcon then
+		local icon = Instance.new("ImageLabel", btn)
+		icon.Size = UDim2.new(0, 30, 0, 30)
+		icon.Position = UDim2.new(1, -35, 0.5, -15)
+		icon.BackgroundTransparency = 1
+		icon.Image = config.DiscordIcon
+		icon.ScaleType = Enum.ScaleType.Fit
+		CreateUICorner(icon, 8)
+	end
+
+	return btn
 end
 
 function AddImageLabel(parent, config)
-	local ImageLabel = Instance.new("ImageLabel", parent)
-	ImageLabel.Size = UDim2.new(0, 100, 0, 100)
-	ImageLabel.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*110)
-	ImageLabel.BackgroundTransparency = 1
-	ImageLabel.Image = config.Image
+	local imgLabel = Instance.new("ImageLabel", parent)
+	imgLabel.Size = UDim2.new(0.95, 0, 0, 150)
+	imgLabel.Position = UDim2.new(0, 10, 0, 10 + (#parent:GetChildren() * 155))
+	imgLabel.BackgroundTransparency = 1
+	imgLabel.Image = config.Image or ""
+	imgLabel.ScaleType = Enum.ScaleType.Fit
+	CreateUICorner(imgLabel, 15)
+	return imgLabel
 end
 
-function AddSection(parent, config)
-	local Section = Instance.new("TextLabel", parent)
-	Section.Size = UDim2.new(1, -20, 0, 30)
-	Section.Position = UDim2.new(0, 10, 0, (#parent:GetChildren()-1)*35)
-	Section.BackgroundTransparency = 1
-	Section.TextColor3 = Color3.new(1, 1, 1)
-	Section.Font = Enum.Font.GothamBold
-	Section.TextScaled = true
-	Section.Text = config[1]
+function AddSection(parent, texts)
+	local yPos = 10 + (#parent:GetChildren() * 50)
+	local label = Instance.new("TextLabel", parent)
+	label.Size = UDim2.new(0.95, 0, 0, 35)
+	label.Position = UDim2.new(0, 10, 0, yPos)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+	label.Text = texts[1] or ""
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	return label
 end
 
 function MinimizeButton(config)
-	local Button = Instance.new("ImageButton", Library.MainFrame)
-	Button.Size = UDim2.new(0, config.Size[1], 0, config.Size[2])
-	Button.Position = UDim2.new(1, -config.Size[1] - 10, 0, 10)
-	Button.Image = config.Image
-	Button.BackgroundColor3 = config.Color
-	if config.Corner then
-		local UICorner = Instance.new("UICorner", Button)
-	end
+	if not Library.MainFrame then return end
+
+	local btn = Instance.new("ImageButton", Library.MainFrame)
+	btn.Name = "MinimizeBtn"
+	btn.Size = UDim2.new(0, config.Size[1], 0, config.Size[2])
+	btn.Position = UDim2.new(1, -config.Size[1] - 10, 0, 60)
+	btn.BackgroundColor3 = config.Color or Color3.fromRGB(10,10,10)
+	btn.Image = config.Image or ""
+	CreateUICorner(btn, 12)
+
 	if config.Stroke then
-		local UIStroke = Instance.new("UIStroke", Button)
-		UIStroke.Color = config.StrokeColor
+		local stroke = Instance.new("UIStroke", btn)
+		stroke.Color = config.StrokeColor or Color3.fromRGB(0,0,0)
 	end
-	Button.MouseButton1Click:Connect(function()
-		Library.MainFrame.Visible = not Library.MainFrame.Visible
+
+	btn.MouseButton1Click:Connect(function()
+		if Library.MainFrame.Visible then
+			Library.MainFrame.Visible = false
+			if Library.OpenButton then
+				Library.OpenButton.Visible = true
+			end
+		else
+			Library.MainFrame.Visible = true
+			if Library.OpenButton then
+				Library.OpenButton.Visible = false
+			end
+		end
 	end)
+
+	return btn
 end
 
+-- تعيين دوال عامة تسهل الاستخدام الخارجي
 _G.MakeWindow = MakeWindow
 _G.MakeTab = MakeTab
 _G.AddButton = AddButton

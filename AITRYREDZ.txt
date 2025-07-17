@@ -49,8 +49,8 @@ ScreenGui = Create("ScreenGui", CoreGui)
 ScreenGui.Name = "UgiX_UI"
 
 local Window = Create("Frame", ScreenGui, {
-  Size = UDim2.new(0, 500, 0, 320),
-  Position = UDim2.new(0.5, -250, 0.5, -160),
+  Size = UDim2.new(0, 600, 0, 380),
+  Position = UDim2.new(0.5, -300, 0.5, -190),
   BackgroundColor3 = Configs_HUB.Cor_Hub,
   Active = true,
   Draggable = true
@@ -72,7 +72,7 @@ local TitleLabel = Create("TextLabel", TopBar, {
   TextSize = 20,
   TextColor3 = Configs_HUB.Cor_DarkText,
   BackgroundTransparency = 1,
-  Size = UDim2.new(1, -80, 1, 0),
+  Size = UDim2.new(1, -90, 1, 0),
   Position = UDim2.new(0, 10, 0, 0),
   TextXAlignment = Enum.TextXAlignment.Left,
   TextYAlignment = Enum.TextYAlignment.Center
@@ -96,49 +96,144 @@ CloseBtn.MouseButton1Click:Connect(function()
   ScreenGui:Destroy()
 end)
 
--- Content Container
-local Content = Create("ScrollingFrame", Window, {
-  Size = UDim2.new(1, -20, 1, -40),
-  Position = UDim2.new(0, 10, 0, 35),
-  BackgroundTransparency = 1,
-  ScrollBarThickness = 6,
-  CanvasSize = UDim2.new(0, 0, 0, 0),
-  AutomaticCanvasSize = Enum.AutomaticSize.Y,
-  VerticalScrollBarInset = Enum.ScrollBarInset.Always
+-- Minimize Button (أعلى اليسار)
+local MinBtn = Create("ImageButton", TopBar, {
+  Image = "rbxassetid://116612960959791",
+  Size = UDim2.new(0, 35, 0, 25),
+  Position = UDim2.new(1, -90, 0, 2),
+  BackgroundColor3 = Configs_HUB.Cor_Options,
+  AutoButtonColor = true
 })
+Corner(MinBtn)
+Stroke(MinBtn)
 
-local UIList = Create("UIListLayout", Content)
-UIList.Padding = UDim.new(0, 8)
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+  minimized = not minimized
+  Window.Visible = not minimized
+  if minimized then
+    Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25)
+  else
+    Tween(Window, "Size", UDim2.new(0, 600, 0, 380), 0.25)
+  end
+end)
 
--- دوال لإضافة العناصر للواجهة --
+-- Tabs Container (على اليسار)
+local TabsContainer = Create("Frame", Window, {
+  Size = UDim2.new(0, 140, 1, -40),
+  Position = UDim2.new(0, 10, 0, 35),
+  BackgroundColor3 = Configs_HUB.Cor_Options,
+})
+Corner(TabsContainer)
+Stroke(TabsContainer)
+
+local TabsLayout = Create("UIListLayout", TabsContainer)
+TabsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabsLayout.Padding = UDim.new(0, 5)
+
+-- Content Container (يمين التبويبات)
+local ContentContainer = Create("Frame", Window, {
+  Size = UDim2.new(1, -160, 1, -40),
+  Position = UDim2.new(0, 160, 0, 35),
+  BackgroundColor3 = Configs_HUB.Cor_Options,
+})
+Corner(ContentContainer)
+Stroke(ContentContainer)
+
+-- لإضافة تبويب جديد
+local tabs = {}
+local contents = {}
+
+local function ClearContents()
+  for _, frame in pairs(contents) do
+    frame.Visible = false
+  end
+end
+
+local function ActivateTab(index)
+  for i, tabBtn in ipairs(tabs) do
+    if i == index then
+      tabBtn.BackgroundColor3 = Color3.fromRGB(92, 64, 51)
+      tabBtn.TextColor3 = Configs_HUB.Cor_DarkText
+      contents[i].Visible = true
+    else
+      tabBtn.BackgroundColor3 = Configs_HUB.Cor_Options
+      tabBtn.TextColor3 = Configs_HUB.Cor_Text
+      contents[i].Visible = false
+    end
+  end
+end
+
+local function MakeTab(name)
+  local tabBtn = Create("TextButton", TabsContainer, {
+    Text = name,
+    Font = Configs_HUB.Text_Font,
+    TextSize = 18,
+    TextColor3 = Configs_HUB.Cor_Text,
+    BackgroundColor3 = Configs_HUB.Cor_Options,
+    Size = UDim2.new(1, 0, 0, 40),
+    AutoButtonColor = true
+  })
+  Corner(tabBtn)
+  Stroke(tabBtn)
+
+  local contentFrame = Create("ScrollingFrame", ContentContainer, {
+    Size = UDim2.new(1, -10, 1, -10),
+    Position = UDim2.new(0, 5, 0, 5),
+    BackgroundTransparency = 1,
+    ScrollBarThickness = 6,
+    CanvasSize = UDim2.new(0, 0, 0, 0),
+    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+    VerticalScrollBarInset = Enum.ScrollBarInset.Always
+  })
+
+  local layout = Create("UIListLayout", contentFrame)
+  layout.Padding = UDim.new(0, 8)
+  layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+  table.insert(tabs, tabBtn)
+  table.insert(contents, contentFrame)
+
+  tabBtn.MouseButton1Click:Connect(function()
+    ActivateTab(#tabs)
+  end)
+
+  -- لو هذا أول تبويب، نظهره تلقائياً
+  if #tabs == 1 then
+    ActivateTab(1)
+  end
+
+  return contentFrame
+end
+
+-- دوال لإضافة العناصر للتاب
 
 local function AddParagraph(parent, texts)
   local frame = Create("Frame", parent, {
-    BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 60),
+    BackgroundColor3 = Configs_HUB.Cor_Hub,
+    Size = UDim2.new(1, 0, 0, 70),
   })
   Corner(frame)
-  Stroke(frame)
 
   local title = Create("TextLabel", frame, {
     Text = texts[1] or "ملاحظة",
     Font = Configs_HUB.Text_Font,
-    TextSize = 18,
+    TextSize = 20,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundTransparency = 1,
     Position = UDim2.new(0, 12, 0, 6),
-    Size = UDim2.new(1, -24, 0, 24),
+    Size = UDim2.new(1, -24, 0, 30),
     TextXAlignment = Enum.TextXAlignment.Left
   })
 
   local content = Create("TextLabel", frame, {
     Text = texts[2] or "",
     Font = Enum.Font.Arial,
-    TextSize = 14,
+    TextSize = 16,
     TextColor3 = Configs_HUB.Cor_Text,
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 12, 0, 30),
-    Size = UDim2.new(1, -24, 0, 24),
+    Position = UDim2.new(0, 12, 0, 36),
+    Size = UDim2.new(1, -24, 0, 30),
     TextXAlignment = Enum.TextXAlignment.Left,
     TextWrapped = true
   })
@@ -148,16 +243,15 @@ end
 
 local function AddDiscord(parent, data)
   local frame = Create("Frame", parent, {
-    BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 60)
+    BackgroundColor3 = Configs_HUB.Cor_Hub,
+    Size = UDim2.new(1, 0, 0, 70)
   })
   Corner(frame)
-  Stroke(frame)
 
   local icon = Create("ImageLabel", frame, {
     Image = data.DiscordIcon or "",
     Size = UDim2.new(0, 50, 0, 50),
-    Position = UDim2.new(0, 10, 0, 5),
+    Position = UDim2.new(0, 10, 0, 10),
     BackgroundTransparency = 1,
     ScaleType = Enum.ScaleType.Fit
   })
@@ -168,7 +262,7 @@ local function AddDiscord(parent, data)
     TextSize = 18,
     TextColor3 = Color3.fromRGB(100, 220, 255),
     BackgroundTransparency = 1,
-    Position = UDim2.new(0, 70, 0, 10),
+    Position = UDim2.new(0, 70, 0, 15),
     Size = UDim2.new(1, -80, 0, 40),
     AutoButtonColor = true,
     TextXAlignment = Enum.TextXAlignment.Left
@@ -180,7 +274,6 @@ local function AddDiscord(parent, data)
       if setclipboard then
         setclipboard(data.DiscordLink or "")
       end
-      -- You can add notification here if you want
     end)
   end)
 
@@ -189,11 +282,10 @@ end
 
 local function AddImageLabel(parent, data)
   local frame = Create("Frame", parent, {
-    BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 130)
+    BackgroundColor3 = Configs_HUB.Cor_Hub,
+    Size = UDim2.new(1, 0, 0, 140)
   })
   Corner(frame)
-  Stroke(frame)
 
   local img = Create("ImageLabel", frame, {
     Image = data.Image or "",
@@ -211,10 +303,10 @@ local function AddSection(parent, texts)
   local label = Create("TextLabel", parent, {
     Text = texts[1] or "القسم",
     Font = Configs_HUB.Text_Font,
-    TextSize = 20,
+    TextSize = 22,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundTransparency = 1,
-    Size = UDim2.new(1, 0, 0, 30),
+    Size = UDim2.new(1, 0, 0, 35),
     TextXAlignment = Enum.TextXAlignment.Left
   })
   return label
@@ -227,7 +319,7 @@ local function AddButton(parent, data)
     TextSize = 18,
     TextColor3 = Configs_HUB.Cor_DarkText,
     BackgroundColor3 = Configs_HUB.Cor_Options,
-    Size = UDim2.new(1, 0, 0, 40),
+    Size = UDim2.new(1, 0, 0, 45),
     AutoButtonColor = true
   })
   Corner(btn)
@@ -261,21 +353,19 @@ local function MinimizeButton(data)
     if minimized then
       Tween(Window, "Size", UDim2.new(0, 0, 0, 0), 0.25)
     else
-      Tween(Window, "Size", UDim2.new(0, 500, 0, 320), 0.25)
+      Tween(Window, "Size", UDim2.new(0, 600, 0, 380), 0.25)
     end
   end)
   return btn
 end
 
--- يعرض الواجهة كاملة مع أوامر --
+-- إضافة التبويبات والواجهة الرئيسية --
 
 return {
-  MakeWindow = function(configs) end, -- تبقى للمطابقة مع ملفك
-  MakeTab = function(configs)
-    -- لاحظ أن التابات هنا مجرد فريم بسيط بالكونتينر الرئيسي Content
-    -- لأننا نعمل tab واحدة "Main"
-    return Content
-  end,
+  MakeWindow = function(configs) end, -- لمطابقة ملفك القديم (يمكن تعديله)
+  
+  MakeTab = MakeTab,
+  
   AddParagraph = AddParagraph,
   AddDiscord = AddDiscord,
   AddImageLabel = AddImageLabel,

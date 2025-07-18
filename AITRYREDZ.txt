@@ -1,10 +1,10 @@
 local Configs_HUB = { 
-  Cor_Hub = Color3.fromRGB(15, 15, 15), 
-  Cor_Options = Color3.fromRGB(20, 20, 20), 
-  Cor_Stroke = Color3.fromRGB(92, 64, 51),
-  Cor_Text = Color3.fromRGB(180, 180, 180), 
+  Cor_Hub = Color3.fromRGB(0, 0, 0), 
+  Cor_Options = Color3.fromRGB(0, 0, 0), 
+  Cor_Stroke = Color3.fromRGB(128, 0, 255),  -- لون بنفسجي
+  Cor_Text = Color3.fromRGB(240, 240, 240), 
   Cor_DarkText = Color3.fromRGB(240, 240, 240), 
-  Corner_Radius = UDim.new(0, 6), 
+  Corner_Radius = UDim.new(0, 4), 
   Text_Font = Enum.Font.FredokaOne 
 }
 
@@ -102,7 +102,7 @@ local ListLayout = Create("UIListLayout", Menu_Notifi, {
 
 function MakeNotifi(Configs)
   local Title = Configs.Title or "REDz HUB"
-  local text = Configs.Text or "NotificaÃ§Ã£o"
+  local text = Configs.Text or "Notificação"
   local timewait = Configs.Time or 5
   
   local Frame1 = Create("Frame", Menu_Notifi, {
@@ -379,7 +379,7 @@ function MakeWindow(Configs)
   end)
   
   local Close_Button = Create("TextButton", ButtonsFrame, {
-    Text = "Ã",
+    Text = "×",
     TextYAlignment = "Bottom",
     TextColor3 = Configs_HUB.Cor_Text,
     Size = UDim2.new(0.5, 0, 1, 0),

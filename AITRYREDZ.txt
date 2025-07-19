@@ -1666,3 +1666,9 @@ end
   end
   return Menu
 end
+return {
+  MakeWindow = MakeWindow,
+  MakeTab = MakeTab,
+  MinimizeButton = MinimizeButton,
+  -- وهكذا لباقي الدوال اللي تحتاجها
+}

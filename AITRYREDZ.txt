@@ -935,6 +935,15 @@ function CreateKeySystem(Configs)
 
   repeat task.wait() until verified
 end
+function MakeWindow(Config)
+  -- محتوى دالة MakeWindow كما هو
+  -- يجب أن تنتهي بهذا السطر:
+  return {
+    MakeTab = MakeTab,
+    MinimizeButton = MinimizeButton
+  }
+end
+
 return {
   MakeWindow = MakeWindow,
   MakeNotifi = MakeNotifi,

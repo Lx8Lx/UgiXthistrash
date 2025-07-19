@@ -89,7 +89,7 @@ local Title = Create("TextLabel", TopBar, {
 })
 
 local Close_Button = Create("TextButton", TopBar, {
-  Text = "×",
+  Text = "Ã",
   TextColor3 = Color3.fromRGB(240, 60, 60),
   Size = UDim2.new(0, 40, 1, 0),
   Position = UDim2.new(1, -45, 0, 0),
@@ -199,8 +199,8 @@ local function MakeTab(name, image)
 
   return contentFrame
 end
-  local title = Configs.Hub.Title or "REDz HUB"
-  local Anim_Title = Configs.Hub.Animation or "by : redz9999"
+  local title = Configs_HUB.Title or "REDz HUB"
+  local Anim_Title = Configs_HUB.Animation or "by : redz9999"
   
   local KeySystem = Configs.Key.KeySystem or false
   local KeyTitle = Configs.Key.Title or "Key System"
@@ -389,7 +389,7 @@ end
   end)
   
   local Close_Button = Create("TextButton", ButtonsFrame, {
-    Text = "×",
+    Text = "Ã",
     TextYAlignment = "Bottom",
     TextColor3 = Configs_HUB.Cor_Text,
     Size = UDim2.new(0.5, 0, 1, 0),
@@ -475,7 +475,7 @@ end
     Confirm.MouseButton1Click:Connect(function()
       CloseGui:Destroy()
       CreateTween(Menu, "Size", UDim2.new(), 0.3, true)
-      DestroyScript()
+      ScreenGui:Destroy()
     end)
     
     CloseGui.MouseButton1Click:Connect(function()
@@ -869,12 +869,12 @@ end
       BackgroundTransparency = 1
     })Corner(Frame2, {CornerRadius = UDim.new(5, 0)})
     
-    local stroke = Stroke(Frame, {
+    local stroke1 = Stroke(Frame, {
       Color = Color3.fromRGB(100, 100, 100),
       Thickness = 3
     })
     
-    local stroke = Stroke(Frame2, {
+    local stroke2 = Stroke(Frame2, {
       Color = Color3.fromRGB(100, 100, 100),
       Thickness = 3
     })
@@ -928,7 +928,7 @@ end
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame",
       Text = 0
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextLabel = Create("TextButton", Frame, {
       TextSize = 12,
@@ -1042,7 +1042,7 @@ end
       Size = UDim2.new(1, 0, 0, 25),
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame"
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextLabel = Create("TextButton", Frame, {
       TextSize = 12,
@@ -1077,8 +1077,7 @@ end
   
   function AddTextBox(parent, Configs)
     local TextBoxName = Configs.Name or "TextBox!!"
-    local Default = Configs.Default or "TextBox"
-    local placeholderText = Configs.PlaceholderText or "TextBox"
+        local placeholderText = Configs.PlaceholderText or "TextBox"
     local ClearText = Configs.ClearText or false
     local Callback = Configs.Callback or function() end
     
@@ -1086,7 +1085,7 @@ end
       Size = UDim2.new(1, 0, 0, 25),
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame"
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextLabel = Create("TextButton", Frame, {
       TextSize = 12,
@@ -1283,8 +1282,7 @@ end
   
   function AddDropdown(parent, Configs)
     local DropdownName = Configs.Name or "Dropdown!!"
-    local Default = Configs.Default or "TextBox"
-    local Options = Configs.Options or {"1", "2", "3"}
+        local Options = Configs.Options or {"1", "2", "3"}
     local Default = Configs.Default or "2"
     local Callback = Configs.Callback or function() end
     
@@ -1294,7 +1292,7 @@ end
       Name = "Frame",
       Text = "",
       AutoButtonColor = false
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextLabel = Create("TextLabel", TextButton, {
       TextSize = 12,
@@ -1473,7 +1471,7 @@ end
       Size = UDim2.new(1, 0, 0, 25),
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame"
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextButton = Create("TextButton", Frame, {
       TextSize = 12,
@@ -1501,7 +1499,7 @@ end
       Size = UDim2.new(0, 95, 0, 110),
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame"
-    })Corner(Frame)Stroke(Frame)
+    })Corner(TextButton)Stroke(TextButton)
     
     local TextButton = Create("TextButton", Frame, {
       TextSize = 12,
@@ -1534,7 +1532,7 @@ end
       BackgroundColor3 = Configs_HUB.Cor_Options,
       Name = "Frame",
       AutomaticSize = "Y"
-    })Corner(Frame)Stroke(Frame)Create("UIListLayout", Frame)Create("UIPadding", Frame, {
+    })Corner(TextButton)Stroke(TextButton)Create("UIListLayout", Frame)Create("UIPadding", Frame, {
       PaddingLeft = UDim.new(0, 20), PaddingRight = UDim.new(0, 10), PaddingTop = UDim.new(0, 5), PaddingBottom = UDim.new(0, 5)
     })
     
